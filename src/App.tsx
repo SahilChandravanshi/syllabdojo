@@ -181,7 +181,19 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
     setSelectorOpen(false);
   }
 
-  return <section className="page fade-in">
+  return <section className="page dashboard-page fade-in">
+    <div className="dashboard-hero">
+      <div>
+        <p className="eyebrow">SYLLABDOJO</p>
+        <h1>Stay on top of your <span>syllabus.</span></h1>
+        <p className="sub">A calm, simple way to track every topic across your exams.</p>
+      </div>
+      <div className="dashboard-stats">
+        <div className="dashboard-stat"><strong>{selectedExams.length}</strong><span>exams</span></div>
+        <div className="dashboard-stat"><strong>{completed.size}</strong><span>topics done</span></div>
+        <div className="dashboard-stat"><strong>{globalProgress}%</strong><span>overall</span></div>
+      </div>
+    </div>
     <div className="dashboard-selector-card">
       <button className="dashboard-selector-label selector-title-button" onClick={openSelector} aria-haspopup="dialog" aria-expanded={selectorOpen}>
         <span className="selector-title">My Exams</span>
