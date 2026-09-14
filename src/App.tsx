@@ -61,6 +61,19 @@ function App() {
   const [toast, setToast] = useState("");
   const [theme, setTheme] = useState<"dark"|"light">(loadTheme);
 
+  // Lock the document while the exam picker sheet is open so the page behind it cannot scroll.
+  useEffect(() => {
+    if (!examSelectorOpen) return;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [examSelectorOpen]);
+
   useEffect(() => {
     localStorage.setItem(VIEW_STATE_KEY, JSON.stringify({screen, selectedExam, openCategory}));
   }, [screen, selectedExam, openCategory]);
@@ -353,7 +366,7 @@ function SubjectOverview({exam, completed, onOpen}:{exam:typeof EXAMS[number], c
       const done = topicIds.filter(id => completed.has(id)).length;
       const total = topicIds.length;
       const percent = total ? Math.round(done / total * 100) : 0;
-      const chartColor = palette[index % palette.length];
+      const chartColor = "var(--text)";
       const firstCategory = categories[0];
       const categoryKey = firstCategory ? `${firstCategory.stage}::${firstCategory.name}` : undefined;
       return <button className="subject-mini" key={`${exam.id}-${group.name}`} onClick={() => onOpen(exam.id, categoryKey)}>
