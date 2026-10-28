@@ -45,26 +45,42 @@ const REASONING: Pair[] = [
   ["reasoning.puzzles","Puzzles"],["reasoning.seating","Seating Arrangement"],["reasoning.logical-reasoning","Logical Reasoning"],["reasoning.data-sufficiency","Data Sufficiency"],
   ["reasoning.statement-assumption","Statement & Assumption"],["reasoning.statement-conclusion","Statement & Conclusion"],["reasoning.statement-argument","Statement & Argument"],
   ["reasoning.cause-effect","Cause & Effect"],["reasoning.course-action","Course of Action"],["reasoning-analogy","Analogy"],["reasoning.classification","Classification"],
-  ["reasoning.series","Series"],["reasoning.calendar","Calendar"],["reasoning.clock","Clock"],["reasoning.odd-one-out","Odd One Out"],["reasoning.embedded-figures","Embedded Figures"]
+  ["reasoning.series","Series"],["reasoning.calendar","Calendar"],["reasoning.clock","Clock"],["reasoning.odd-one-out","Odd One Out"],["reasoning.embedded-figures","Embedded Figures"],
+  ["reasoning.visual-reasoning","Non-verbal / Figure Reasoning"],["reasoning.word-formation","Word Formation"],
+  ["reasoning.order-sequence","Ordering & Sequencing"],["reasoning.logical-connectives","Logical Connectives"],["reasoning.inference","Drawing Inferences"],
+  ["reasoning.critical-thinking","Critical Thinking"],["reasoning.symbol-operations","Symbolic Operations"],["reasoning.matrix","Number / Figure Matrix"],
+  ["reasoning.paper-folding","Paper Folding & Cutting"],["reasoning.mirror-water-images","Mirror & Water Images"],["reasoning.figure-completion","Figure Completion"],
+  ["reasoning.spatial-orientation","Spatial Orientation"],["reasoning.visual-memory","Visual Memory & Observation"]
 ];
 
 const ENGLISH: Pair[] = [
   ["english.reading","Reading Comprehension"],["english.cloze","Cloze Test"],["english.error","Error Detection"],["english.fillers","Fill in the Blanks"],
   ["english.parajumbles","Para Jumbles"],["english.vocabulary","Vocabulary"],["english.grammar","Grammar"],["english.sentence-improvement","Sentence Improvement"],
   ["english.phrasal-verbs","Phrasal Verbs"],["english.synonyms-antonyms","Synonyms & Antonyms"],["english.one-word","One Word Substitution"],["english.spelling","Spelling"],
-  ["english.para-completion","Para Completion"],["english.sentence-rearrangement","Sentence Rearrangement"],["english-word-usage","Word Usage"]
+  ["english.para-completion","Para Completion"],["english.sentence-rearrangement","Sentence Rearrangement"],["english-word-usage","Word Usage"],
+  ["english.sentence-connectors","Sentence Connectors"],["english.mis-spelt-words","Misspelt Words"],["english.word-swapping","Word Swapping"],
+  ["english.phrase-replacement","Phrase Replacement"],["english.sentence-completion","Sentence Completion"],["english.rearrangement","Sentence / Paragraph Rearrangement"],
+  ["english.grammar-agreement","Subject-Verb Agreement"],["english.prepositions","Prepositions & Conjunctions"],["english.active-passive","Active & Passive Voice"],
+  ["english.direct-indirect","Direct & Indirect Speech"],["english.modifiers","Modifiers & Parallelism"]
 ];
 
 const COMPUTER: Pair[] = [
-  ["computer.fundamentals","Computer Fundamentals"],["computer.hardware","Computer Hardware"],["computer.software","Computer Software"],["computer.operating-systems","Operating Systems"],
-  ["computer.internet","Internet & Networking"],["computer.ms-office","MS Office"],["computer.database","Database Basics"],["computer.security","Computer Security"],
-  ["computer.shortcuts","Keyboard Shortcuts"],["computer.number-system","Computer Number System"]
+  ["computer.fundamentals","Computer Fundamentals"],["computer.hardware","Computer Hardware & Input/Output Devices"],["computer.software","Software & Windows Basics"],["computer.operating-systems","Operating Systems"],
+  ["computer.internet","Internet, Networking & E-mail"],["computer.ms-office","MS Office (Word, Excel & PowerPoint)"],["computer.database","Database Basics"],["computer.security","Computer Security & Cybersecurity"],
+  ["computer.shortcuts","Keyboard Shortcuts"],["computer.number-system","Computer Number System & Common Ports"],
+  ["computer.memory","Computer Memory & Storage"],["computer.input-output","Input / Output Devices"],["computer.data-representation","Data Representation & Units"],
+  ["computer.network-types","Network Types & Topologies"],["computer.protocols","Internet Protocols & Web Basics"],["computer.email","Email & Communication Tools"],
+  ["computer.operating-shortcuts","Operating System Basics & Shortcuts"],["computer.virus-malware","Viruses, Malware & Protection"],["computer.cloud","Cloud Computing Basics"],
+  ["computer.ai-basics","AI & Emerging Technology Basics"]
 ];
 
 const CURRENT_AFFAIRS: Pair[] = [
   ["ga.current-affairs","Current Affairs"],["ga.government-schemes","Government Schemes"],["ga.reports-indices","Reports & Indices"],
   ["ga.international","International Affairs"],["ga.awards","Awards & Honours"],["ga.books","Books & Authors"],["ga.sports","Sports"],
-  ["ga.obituaries","Important Appointments & Obituaries"],["ga.commissions","Important Institutions & Commissions"]
+  ["ga.obituaries","Important Appointments & Obituaries"],["ga.commissions","Important Institutions & Commissions"],
+  ["ga.defence","Defence Exercises & Organisations"],["ga.places","Places in News"],["ga.days-themes","Important Days & Themes"],
+  ["ga.national-parks","National Parks & Protected Areas"],["ga.census","Census & Demographic Indicators"],["ga.organisations","National & International Organisations"],
+  ["ga.science-tech","Science & Technology in News"],["ga.summits","Summits & Conferences"]
 ];
 
 const DIGITAL_AWARENESS: Pair[] = [["digital.payments","Digital Payments"],["digital.upi","UPI & Payment Systems"],["digital.fintech","FinTech & Digital Banking"],["digital.cyber","Cyber Security & Safe Banking"]];
@@ -91,52 +107,104 @@ const FINANCIAL_AWARENESS: Pair[] = [
 
 const DATA_ANALYSIS: Pair[] = [
   ["quant.data-interpretation","Data Interpretation"],["quant.data-sufficiency","Data Sufficiency"],
-  ["quant.partnership","Partnership"],["quant.boats-streams","Boats & Streams"]
+  ["quant.missing-di","Missing / Caselet Data Interpretation"],
+  ["quant.quantity-comparison","Quantity Comparison"],["quant.data-comparison","Data Comparison"],["quant.table-di","Table DI"],["quant.mixed-di","Mixed Graph DI"]
 ];
 
 const RBI_ESI: Pair[] = [
   ["rbi.inflation","Inflation"],["rbi.growth-development","Growth & Development"],["rbi.national-income","National Income"],["rbi.employment","Employment"],
   ["rbi.poverty","Poverty & Inequality"],["rbi.globalisation","Globalisation"],["rbi.bop","Balance of Payments"],["rbi.esi","Economic & Social Issues"],
-  ["rbi.imf-world-bank","IMF & World Bank"],["rbi.wto","WTO"],["rbi.monetary-policy","Monetary Policy"],["rbi.fiscal-policy","Fiscal Policy"]
+  ["rbi.imf-world-bank","IMF & World Bank"],["rbi.wto","WTO"],["rbi.monetary-policy","Monetary Policy"],["rbi.fiscal-policy","Fiscal Policy"],
+  ["rbi.growth-models","Growth Models & Development Strategies"],["rbi.sustainable-development","Sustainable Development Goals"],
+  ["rbi.demographics","Demographics, Migration & Urbanisation"],["rbi.health-education","Health, Education & Human Development"],
+  ["rbi.social-justice","Social Justice & Welfare Programmes"],["rbi.climate-economy","Climate Change & Economy"],
+  ["rbi.agriculture","Agriculture, Food Security & Rural Development"],["rbi.international-trade","International Trade & Trade Policy"],
+  ["rbi.social-sector","Social Sector Initiatives & Government Programmes"]
 ];
 
 const RBI_FINANCE: Pair[] = [
-  ["rbi.financial-system","Financial System"],["rbi.financial-markets","Financial Markets"],["rbi.banking-system","Banking System in India"],["rbi.banking-regulation","Banking Regulation"],
-  ["rbi.sebi","SEBI & Capital Markets"],["rbi.insurance","Insurance Sector"],["rbi.pension","Pension Sector"],["rbi.external-sector","External Sector"],
-  ["rbi.forex","Foreign Exchange Market"],["rbi.public-finance","Public Finance"],["rbi.union-budget","Union Budget"],["rbi.monetary-policy","Monetary Policy"],
-  ["rbi.fiscal-policy","Fiscal Policy"],["rbi.inflation","Inflation"],["rbi.imf-world-bank","IMF & World Bank"],["rbi.wto","WTO"]
+  ["rbi.financial-system","Financial System"],["rbi.financial-markets","Financial Markets"],["rbi.banking-system","Banking System"],["rbi.banking-regulation","Banking Regulation"],
+  ["rbi.sebi","SEBI & Capital Markets"],["rbi.insurance","Insurance"],["rbi.pension","Pension"],["rbi.external-sector","External Sector"],
+  ["rbi.forex","Foreign Exchange"],["rbi.public-finance","Public Finance"],["rbi.union-budget","Union Budget"],["rbi.monetary-policy","Monetary Policy"],
+  ["rbi.fiscal-policy","Fiscal Policy"],["rbi.inflation","Inflation"],["rbi.imf-world-bank","IMF & World Bank"],["rbi.wto","WTO"],
+  ["rbi.government-securities","Government Securities & Bond Markets"],["rbi.money-market","Money Market Instruments"],
+  ["rbi.capital-market","Capital Market Instruments"],["rbi.derivatives","Derivatives & Risk Management"],
+  ["rbi.financial-inclusion","Financial Inclusion & Priority Sector"],["rbi.regulatory-bodies","Financial Regulators & Institutions"],
+  ["rbi.npa","NPA Management & Basel Framework"],["rbi.fintech","FinTech, Digital Payments & Cybersecurity"],
+  ["rbi.public-debt","Public Debt & Fiscal Deficit"],["rbi.taxation","Taxation & GST"],
+  ["rbi.international-finance","International Financial Institutions & Architecture"]
 ];
 
 const RBI_MANAGEMENT: Pair[] = [
   ["rbi.management","Management"],["rbi.corporate-governance","Corporate Governance"],["rbi.hrd","Human Resource Development"],["rbi.leadership","Leadership"],
-  ["rbi.motivation","Motivation"],["rbi.communication","Communication"]
+  ["rbi.motivation","Motivation"],["rbi.communication","Communication"],["rbi.organisation","Organisational Structure & Design"],["rbi.planning","Planning & Decision Making"],
+  ["rbi.control","Control & Coordination"],["rbi.conflict","Conflict Management & Negotiation"],["rbi.change-management","Change Management"],
+  ["rbi.performance","Performance Appraisal & HR Practices"],["rbi.teamwork","Teams & Group Dynamics"],["rbi.work-culture","Organisational Culture & Ethics"]
 ];
 
 const SEBI_COMMERCE: Pair[] = [
   ["sebi.accounting","Accounting"],["sebi.financial-statement","Financial Statements"],["sebi.accounting-standards","Accounting Standards"],
-  ["sebi.audit","Auditing"],["sebi.financial-ratio","Financial Statement Analysis"]
+  ["sebi.audit","Auditing"],["sebi.financial-ratio","Financial Statement Analysis"],
+  ["sebi.accounting-concepts","Accounting Principles & Concepts"],["sebi.company-accounts","Company Accounts"],
+  ["sebi.cash-flow","Cash Flow & Funds Flow Statements"],["sebi.consolidation","Consolidated Financial Statements"],
+  ["sebi.ind-as","Indian Accounting Standards (Ind AS)"],["sebi.corporate-reporting","Corporate Financial Reporting"]
 ];
 const SEBI_FINANCE: Pair[] = [
   ["sebi.securities-market","Securities Market"],["rbi.financial-markets","Financial Markets"],["sebi.equity-market","Equity Markets"],
   ["sebi.debt-market","Debt Markets"],["sebi.mutual-funds","Mutual Funds"],["sebi.derivatives","Derivatives"],
   ["sebi.forex","Foreign Exchange"],["sebi.banking","Banking & Financial System"],["sebi.financial-inclusion","Financial Inclusion"],
-  ["sebi-regulation","Securities Regulation"]
+  ["sebi-regulation","Securities Regulation"],["sebi.primary-market","Primary Market & Public Issues"],["sebi.secondary-market","Secondary Market & Trading"],
+  ["sebi.market-intermediaries","Market Intermediaries & Depositories"],["sebi.investor-protection","Investor Protection & Grievance Redressal"],
+  ["sebi.mutual-regulation","Mutual Fund Regulation"],["sebi.insider-trading","Insider Trading & Takeover Regulations"],
+  ["sebi.listing-regulations","Listing Obligations & Disclosure Requirements"],["sebi.securitisation","Securitisation & Structured Finance"]
 ];
-const SEBI_ECONOMICS: Pair[] = [["sebi.economics","Economics"]];
-const SEBI_MANAGEMENT: Pair[] = RBI_MANAGEMENT;
-const SEBI_COSTING: Pair[] = [["sebi.costing","Cost & Management Accounting"],["sebi.cost-accounting","Cost Accounting"],["sebi.budgetary-control","Budgetary Control"]];
-const SEBI_COMPANIES: Pair[] = [["sebi.companies","Companies Act & Corporate Law"],["sebi.corporate-governance","Corporate Governance"]];
+const SEBI_ECONOMICS: Pair[] = [
+  ["sebi.economics","Economics"],["sebi.microeconomics","Microeconomics"],["sebi.macroeconomics","Macroeconomics"],
+  ["sebi.economic-growth","Economic Growth & Development"],["sebi.inflation-policy","Inflation & Monetary Policy"],
+  ["sebi.fiscal-policy","Fiscal Policy & Public Finance"],["sebi.international-economics","International Economics & Trade"],
+  ["sebi.economic-indicators","National Income & Economic Indicators"]
+];
+const SEBI_MANAGEMENT: Pair[] = [
+  ...RBI_MANAGEMENT,["sebi.management-principles","Management Principles & Functions"],["sebi.strategic-management","Strategic Management"],
+  ["sebi.marketing-management","Marketing Management"],["sebi.operations-management","Operations & Quality Management"],
+  ["sebi.project-management","Project Management"],["sebi.business-ethics","Business Ethics & Corporate Governance"],
+  ["sebi.hr-management","Human Resource Management"],["sebi.organisation-behaviour","Organisational Behaviour"]
+];
+const SEBI_COSTING: Pair[] = [
+  ["sebi.costing","Cost & Management Accounting"],["sebi.cost-accounting","Cost Accounting"],["sebi.budgetary-control","Budgetary Control"],
+  ["sebi.marginal-costing","Marginal Costing & CVP Analysis"],["sebi.standard-costing","Standard Costing & Variance Analysis"],
+  ["sebi.absorption-costing","Absorption Costing"],["sebi.activity-costing","Activity-Based Costing"],
+  ["sebi.cost-control","Cost Control & Cost Reduction"],["sebi.management-accounting","Management Accounting & Decision Making"]
+];
+const SEBI_COMPANIES: Pair[] = [
+  ["sebi.companies","Companies Act & Corporate Law"],["sebi.corporate-governance","Corporate Governance"],
+  ["sebi.company-formation","Incorporation & Share Capital"],["sebi.board-management","Board of Directors & Management"],
+  ["sebi.company-meetings","Company Meetings & Resolutions"],["sebi.audit-company-law","Accounts, Audit & Auditors under Companies Act"],
+  ["sebi.csr","Corporate Social Responsibility"],["sebi.llp","Company Law, LLPs & Related Provisions"]
+];
 const NABARD_ESI: Pair[] = [
   ["rbi.esi","Economic & Social Issues"],["ga.economy","Indian Economy"],["rbi.inflation","Inflation"],["nabard.poverty","Poverty Alleviation"],
   ["nabard.employment","Employment Generation"],["nabard.population","Population & Demography"],["nabard.social-structure","Social Structure"],["nabard.social-justice","Social Justice"],
-  ["nabard.education-health","Education & Health"],["nabard.environment","Environment"],["nabard-climate-change","Climate Change & Sustainable Development"]
+  ["nabard.education-health","Education & Health"],["nabard.environment","Environment"],["nabard-climate-change","Climate Change & Sustainable Development"],
+  ["nabard.indian-economy","Structure of Indian Economy & Economic Reforms"],["nabard.rural-economy","Rural Economy & Rural Labour"],
+  ["nabard.inflation-policy","Inflation, Monetary & Fiscal Policy"],["nabard.poverty-programmes","Poverty Alleviation & Government Programmes"],
+  ["nabard.demographic-trends","Demographic Trends & Migration"],["nabard.health-education","Education, Health & Human Development"],
+  ["nabard.farmers","Farmers, Land Reforms & Tenancy"],["nabard.food-security","Food Security & Public Distribution"],
+  ["nabard.social-protection","Social Protection & Inclusive Growth"]
 ];
 const NABARD_ARD: Pair[] = [
   ["nabard.agriculture-basics","Agriculture Basics"],["nabard.agronomy","Agronomy"],["nabard.soil","Soils & Soil Management"],["nabard.water","Water Resources & Irrigation"],
   ["nabard.cropping","Cropping Systems"],["nabard.seeds","Seeds & Planting Material"],["nabard.plant-breeding","Plant Breeding"],["nabard.horticulture","Horticulture"],
   ["nabard.animal-husbandry","Animal Husbandry"],["nabard.dairy","Dairy Development"],["nabard.fisheries","Fisheries"],["nabard.forestry","Forestry"],
   ["nabard.food-processing","Food Processing"],["nabard.agri-marketing","Agricultural Marketing"],["nabard.agri-schemes","Agriculture & Rural Development Schemes"],
-  ["nabard.rural-development","Rural Development"],["nabard.panchayati-raj","Panchayati Raj"],["nabard.tribal-development","Tribal Development"]
+  ["nabard.rural-development","Rural Development"],["nabard.panchayati-raj","Panchayati Raj"],["nabard.tribal-development","Tribal Development"],
+  ["nabard.agriculture-economy","Agriculture in Indian Economy"],["nabard.agri-extension","Agricultural Extension & Technology Transfer"],
+  ["nabard.plant-protection","Plant Protection & Integrated Pest Management"],["nabard.organic-farming","Organic & Natural Farming"],
+  ["nabard.agri-research","Agricultural Research & Education"],["nabard.climate-agriculture","Climate Change & Sustainable Agriculture"],
+  ["nabard.agri-insurance","Crop Insurance & Risk Management"],["nabard.cooperatives","Cooperatives, FPOs & SHGs"],
+  ["nabard.rural-infrastructure","Rural Infrastructure & Development Institutions"],["nabard.irrigation-schemes","Irrigation Programmes & Watershed Development"],
+  ["nabard.livestock-health","Livestock Health, Breeds & Management"],["nabard.fisheries-aquaculture","Fisheries & Aquaculture"],
+  ["nabard.agri-marketing-reforms","Agricultural Markets, MSP & Marketing Reforms"]
 ];
 const NABARD_FINANCE: Pair[] = [
   ["nabard.rural-banking","Rural Banking"],["nabard.rural-credit","Rural Credit"],["rbi.financial-system","Financial System"],["nabard.banking-reforms","Banking & Financial Sector Reforms"],["nabard.agri-finance","Agricultural Finance"]
@@ -144,7 +212,14 @@ const NABARD_FINANCE: Pair[] = [
 
 const DESCRIPTIVE: Pair[] = [["english.descriptive","Descriptive English"],["english.essay","Essay Writing"],["english.comprehension","Comprehension"],["english.precis","Precis Writing"],["english.email","Email Writing"]];
 const DECISION_MAKING: Pair[] = [["reasoning.decision-making","Decision Making"],["reasoning.ethics","Ethical Reasoning"],["reasoning.situational","Situational Judgement"]];
-const SSC_COMPUTER: Pair[] = [["computer.fundamentals","Computer Basics"],["computer.hardware","Input/Output Devices & Memory"],["computer.software","Windows & Software"],["computer.ms-office","MS Word, Excel & PowerPoint"],["computer.internet","Internet & E-mail"],["computer.security","Networking & Cyber Security"],["computer.shortcuts","Keyboard Shortcuts"],["computer.number-system","Ports, Abbreviations & Number System"]];
+const SSC_MATH: Pair[] = QUANT.filter(([id]) => new Set([
+  "quant.number-system","quant.percentages","quant.ratio","quant.average","quant.profit-loss","quant.simple-interest",
+  "quant.compound-interest","quant.time-work","quant.time-distance","quant.partnership","quant.mixture","quant.ages",
+  "quant.quadratic","quant.arithmetic-equations","quant.data-interpretation","quant.line-di","quant.bar-di","quant.pie-di",
+  "quant.caselet-di","quant.mensuration","quant.geometry","quant.algebra","quant.trigonometry","quant.statistics","quant.probability",
+  "quant.hcf-lcm","quant.simplification","quant.sequence"
+]).has(id));
+const SSC_COMPUTER: Pair[] = [["computer.fundamentals","Computer Fundamentals"],["computer.hardware","Computer Hardware & Input/Output Devices"],["computer.software","Software & Windows Basics"],["computer.ms-office","MS Office (Word, Excel & PowerPoint)"],["computer.internet","Internet, Networking & E-mail"],["computer.security","Computer Security & Cybersecurity"],["computer.shortcuts","Keyboard Shortcuts"],["computer.number-system","Computer Number System & Common Ports"]];
 const EXAM_GROUPS: Record<string, SubjectGroup[]> = {
   "ibps-po":[
     {stage:"Prelims",name:"English Language",topics:ENGLISH},
@@ -220,11 +295,11 @@ const EXAM_GROUPS: Record<string, SubjectGroup[]> = {
     {stage:"Mains",name:"Agriculture & Rural Development",topics:NABARD_ARD}
   ],
   "ssc-cgl":[
-    {stage:"Tier I",name:"Mathematical Abilities",topics:QUANT},
+    {stage:"Tier I",name:"Mathematical Abilities",topics:SSC_MATH},
     {stage:"Tier I",name:"General Intelligence & Reasoning",topics:REASONING},
     {stage:"Tier I",name:"English Language & Comprehension",topics:ENGLISH},
     {stage:"Tier I",name:"General Awareness",topics:GENERAL_AWARENESS},
-    {stage:"Tier II",name:"Mathematical Abilities",topics:QUANT},
+    {stage:"Tier II",name:"Mathematical Abilities",topics:SSC_MATH},
     {stage:"Tier II",name:"Reasoning & General Intelligence",topics:REASONING},
     {stage:"Tier II",name:"English Language & Comprehension",topics:ENGLISH},
     {stage:"Tier II",name:"General Awareness",topics:GENERAL_AWARENESS},
@@ -260,4 +335,4 @@ export const EXAMS: Exam[] = [
   {id:"ssc-cgl",name:"SSC CGL",short:"SS",description:"Combined Graduate Level"}
 ].map(exam=>({...exam,categories:EXAM_GROUPS[exam.id].map(group=>({stage:group.stage,name:group.name,subjectId:subjectKey(group.name),topicIds:[...new Set(group.topics.map(([id])=>id))]}))}));
 
-export const DATA_VERSION="2026.09.12-stage-aware-v6";
+export const DATA_VERSION="2026.10.28-syllabus-audit-v7";

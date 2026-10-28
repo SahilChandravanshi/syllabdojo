@@ -384,12 +384,12 @@ type TrackerMeta = { pattern?: string; marks?: string; questions?: string; note?
 
 const STAGE_META: Record<string, Record<string, TrackerMeta>> = {
   "ibps-po": {
-    "Prelims": {pattern:"Online · 100 marks · 60 minutes · 100 MCQs", note:"Sectional time limits"},
-    "Mains": {pattern:"Online + Descriptive · 225 + 25 marks · 180 + 30 minutes", note:"Objective paper followed by descriptive test"}
+    "Prelims": {pattern:"Online · 100 marks · 60 minutes · 100 questions", note:"Three timed sections; check the current notification for the exact section split"},
+    "Mains": {pattern:"Online · Objective + Descriptive · 200 + 25 marks", note:"Section counts and timing can change by recruitment cycle; verify the current IBPS notification"}
   },
   "sbi-po": {
-    "Prelims": {pattern:"Online · 100 marks · 60 minutes · 100 MCQs", note:"20 minutes per section"},
-    "Mains": {pattern:"Online + Descriptive · 250 + 50 marks · 180 + 30 minutes", note:"4 objective sections + 1 descriptive paper"}
+    "Prelims": {pattern:"Online · 100 marks · 60 minutes · 100 questions", note:"2026 pattern: English 40, Quantitative Aptitude 30, Reasoning Ability 30; 20 minutes each"},
+    "Mains": {pattern:"Online · Objective + Descriptive · 200 + 30 marks · 180 + 30 minutes", note:"Four separately timed objective sections followed by descriptive English"}
   },
   "rrb-po": {
     "Prelims": {pattern:"Online · 80 marks · 45 minutes · 80 questions"},
@@ -400,12 +400,12 @@ const STAGE_META: Record<string, Record<string, TrackerMeta>> = {
     "Phase II": {pattern:"Online · 300 marks · Descriptive + Objective", note:"Three papers"}
   },
   "sebi-grade-a": {
-    "Phase I": {pattern:"Online · 200 marks · 120 minutes · 200 questions", note:"Paper I + Paper II"},
-    "Phase II": {pattern:"Online · 200 marks · Descriptive + Objective", note:"Paper I + Paper II"}
+    "Phase I": {pattern:"Online · 200 marks · 100 minutes", note:"Paper I: 100 marks / 60 minutes; Paper II: 100 marks / 40 minutes"},
+    "Phase II": {pattern:"Online · 200 marks · 150 minutes", note:"Paper I: English descriptive, 100 marks / 60 minutes; General Stream Paper II: 100 marks / 90 minutes"}
   },
   "nabard-grade-a": {
     "Prelims": {pattern:"Online · 200 marks · 120 minutes · 200 MCQs", note:"Qualifying + merit sections"},
-    "Mains": {pattern:"Online · 200 marks · Descriptive + Objective", note:"Paper I + Paper II"}
+    "Mains": {pattern:"Online · 200 marks · about 210 minutes", note:"Paper I: English descriptive, 100 marks / 90 minutes; Paper II: ESI & ARD, 100 marks with objective and descriptive components"}
   },
   "ssc-cgl": {
     "Tier I": {pattern:"Computer Based Exam · 200 marks · 60 minutes · 100 MCQs", note:"Qualifying / screening stage"},
@@ -414,31 +414,31 @@ const STAGE_META: Record<string, Record<string, TrackerMeta>> = {
 };
 
 const SUBJECT_META: Record<string, TrackerMeta> = {
-  "ibps-po|Prelims|English Language": {marks:"30 marks",questions:"30 questions"},
-  "ibps-po|Prelims|Quantitative Aptitude": {marks:"35 marks",questions:"35 questions"},
-  "ibps-po|Prelims|Reasoning Ability": {marks:"35 marks",questions:"35 questions"},
-  "ibps-po|Mains|Reasoning Ability": {marks:"60 marks",questions:"45 questions"},
-  "ibps-po|Mains|Computer Aptitude": {marks:"60 marks",questions:"45 questions",note:"Included in Reasoning & Computer Aptitude"},
-  "ibps-po|Mains|Data Analysis & Interpretation": {marks:"60 marks",questions:"35 questions"},
-  "ibps-po|Mains|English Language": {marks:"40 marks",questions:"35 questions"},
-  "ibps-po|Mains|General Awareness": {marks:"40 marks",questions:"40 questions"},
-  "ibps-po|Mains|Economy Awareness": {marks:"40 marks",questions:"40 questions",note:"Part of General/Economy/Banking Awareness"},
-  "ibps-po|Mains|Banking Awareness": {marks:"40 marks",questions:"40 questions",note:"Part of General/Economy/Banking Awareness"},
-  "ibps-po|Mains|Financial Awareness": {marks:"40 marks",questions:"40 questions",note:"Part of General/Economy/Banking Awareness"},
-  "ibps-po|Mains|Descriptive English": {marks:"25 marks",questions:"Descriptive",note:"Letter + Essay"},
+  "ibps-po|Prelims|English Language": {marks:"See current notification",questions:"English Language section",note:"Exact section split is recruitment-cycle specific"},
+  "ibps-po|Prelims|Quantitative Aptitude": {marks:"See current notification",questions:"Quantitative Aptitude section",note:"Exact section split is recruitment-cycle specific"},
+  "ibps-po|Prelims|Reasoning Ability": {marks:"See current notification",questions:"Reasoning Ability section",note:"Exact section split is recruitment-cycle specific"},
+  "ibps-po|Mains|Reasoning Ability": {marks:"See current notification",questions:"Part of Reasoning & Computer Aptitude",note:"Section-level split is not represented separately in the syllabus checklist"},
+  "ibps-po|Mains|Computer Aptitude": {marks:"See current notification",questions:"Part of Reasoning & Computer Aptitude",note:"Shared section; not a separate marks allocation"},
+  "ibps-po|Mains|Data Analysis & Interpretation": {marks:"See current notification",questions:"Data Analysis & Interpretation section",note:"Verify current cycle notification for exact section pattern"},
+  "ibps-po|Mains|English Language": {marks:"See current notification",questions:"English Language section",note:"Verify current cycle notification for exact section pattern"},
+  "ibps-po|Mains|General Awareness": {marks:"See current notification",questions:"General / Economy / Banking awareness",note:"Shared awareness area; not separate marks allocations"},
+  "ibps-po|Mains|Economy Awareness": {marks:"Part of awareness section",questions:"Part of awareness section",note:"Combined with general and banking awareness for tracker purposes"},
+  "ibps-po|Mains|Banking Awareness": {marks:"Part of awareness section",questions:"Part of awareness section",note:"Combined with general and economy awareness for tracker purposes"},
+  "ibps-po|Mains|Financial Awareness": {marks:"Part of awareness section",questions:"Part of awareness section",note:"Combined with general and economy awareness for tracker purposes"},
+  "ibps-po|Mains|Descriptive English": {marks:"See current notification",questions:"Descriptive English",note:"Check the current notification for format and marks"},
 
-  "sbi-po|Prelims|English Language": {marks:"30 marks",questions:"30 questions"},
-  "sbi-po|Prelims|Quantitative Aptitude": {marks:"35 marks",questions:"35 questions"},
-  "sbi-po|Prelims|Reasoning Ability": {marks:"35 marks",questions:"35 questions"},
-  "sbi-po|Mains|Data Analysis & Interpretation": {marks:"60 marks",questions:"35 questions"},
-  "sbi-po|Mains|Reasoning Ability": {marks:"60 marks",questions:"45 questions",note:"Part of Reasoning & Computer Aptitude"},
-  "sbi-po|Mains|Computer Aptitude": {marks:"60 marks",questions:"45 questions",note:"Part of Reasoning & Computer Aptitude"},
-  "sbi-po|Mains|General Awareness": {marks:"40 marks",questions:"40 questions"},
-  "sbi-po|Mains|Economy Awareness": {marks:"40 marks",questions:"40 questions",note:"Part of General/Economy/Banking Awareness"},
-  "sbi-po|Mains|Banking Awareness": {marks:"40 marks",questions:"40 questions",note:"Part of General/Economy/Banking Awareness"},
-  "sbi-po|Mains|Financial Awareness": {marks:"40 marks",questions:"40 questions",note:"Part of General/Economy/Banking Awareness"},
-  "sbi-po|Mains|English Language": {marks:"40 marks",questions:"35 questions"},
-  "sbi-po|Mains|Descriptive English": {marks:"50 marks",questions:"Descriptive",note:"Essay + Letter + Precis"},
+  "sbi-po|Prelims|English Language": {marks:"40 marks",questions:"40 questions",note:"2026 notification"},
+  "sbi-po|Prelims|Quantitative Aptitude": {marks:"30 marks",questions:"30 questions",note:"2026 notification"},
+  "sbi-po|Prelims|Reasoning Ability": {marks:"30 marks",questions:"30 questions",note:"2026 notification"},
+  "sbi-po|Mains|Data Analysis & Interpretation": {marks:"60 marks",questions:"30 questions",note:"2026 notification"},
+  "sbi-po|Mains|Reasoning Ability": {marks:"Combined 60 marks",questions:"Combined 40 questions",note:"Shared section with Computer Aptitude; do not count twice"},
+  "sbi-po|Mains|Computer Aptitude": {marks:"Combined 60 marks",questions:"Combined 40 questions",note:"Shared section with Reasoning Ability; do not count twice"},
+  "sbi-po|Mains|General Awareness": {marks:"60 marks",questions:"60 questions",note:"Combined General Awareness / Economy / Banking Knowledge section"},
+  "sbi-po|Mains|Economy Awareness": {marks:"Part of 60 marks",questions:"Part of 60 questions",note:"Included in the combined General Awareness / Economy / Banking Knowledge section"},
+  "sbi-po|Mains|Banking Awareness": {marks:"Part of 60 marks",questions:"Part of 60 questions",note:"Included in the combined General Awareness / Economy / Banking Knowledge section"},
+  "sbi-po|Mains|Financial Awareness": {marks:"Part of 60 marks",questions:"Part of 60 questions",note:"Included in the combined General Awareness / Economy / Banking Knowledge section"},
+  "sbi-po|Mains|English Language": {marks:"20 marks",questions:"40 questions",note:"2026 notification"},
+  "sbi-po|Mains|Descriptive English": {marks:"30 marks",questions:"3 tasks",note:"Email, situation analysis, and report or précis writing; 30 minutes"},
 
   "rrb-po|Prelims|Reasoning Ability": {marks:"40 marks",questions:"40 questions"},
   "rrb-po|Prelims|Quantitative Aptitude": {marks:"40 marks",questions:"40 questions"},
