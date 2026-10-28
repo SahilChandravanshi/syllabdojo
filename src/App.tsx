@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { BarChart3, Check, ChevronDown, Download, Home, MoreHorizontal, Moon, RotateCcw, Search, Sun, Upload, X } from "lucide-react";
+import { BarChart3, Check, ChevronDown, Download, Home, Info, MoreHorizontal, Moon, RotateCcw, Search, Sun, Upload, X } from "lucide-react";
 import { EXAMS, EXAM_TOPIC_IDS, TOPICS, DATA_VERSION } from "./data";
 
 type Store = {
@@ -182,6 +182,8 @@ function App() {
 
 function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedExams, toggleHomeExam, selectorOpen, setSelectorOpen, search, setSearch}:{completed:Set<string>,globalProgress:number,examProgress:(id:string)=>number,onOpen:(id:string,category?:string)=>void,selectedExams:string[],toggleHomeExam:(id:string)=>void,selectorOpen:boolean,setSelectorOpen:(open:boolean)=>void,search:string,setSearch:(value:string)=>void}) {
   const visibleExams = EXAMS.filter(exam => selectedExams.includes(exam.id));
+  const [infoExamId, setInfoExamId] = useState<string | null>(null);
+  const infoExam = EXAMS.find(exam => exam.id === infoExamId) ?? null;
   const filteredExams = EXAMS.filter(exam => exam.name.toLowerCase().includes(search.trim().toLowerCase()));
 
   function openSelector() {
@@ -228,28 +230,38 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
     <div className="home-exam-sections">
       {visibleExams.map(exam => <div className="home-exam-section" key={exam.id}>
         <div className="home-exam-heading">
-          <button className="home-exam-main" onClick={() => onOpen(exam.id)}>
+          <div className="home-exam-main" onClick={() => onOpen(exam.id)} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(exam.id); } }} role="button" tabIndex={0} aria-label={`Open ${exam.name} tracker`}>
             <div className={`exam-icon exam-${exam.id}`}><ExamIcon examId={exam.id}/></div>
-            <div className="home-exam-title"><b>{exam.name}</b><span>{exam.description}</span></div>
-            <span className="exam-arrow">›</span>
-          </button>
-          <div className="home-exam-overall">
-            {(() => {
-              const topicIds = [...new Set(exam.categories.flatMap(c => c.topicIds))];
-              const total = topicIds.length;
-              const done = topicIds.filter(id => completed.has(id)).length;
-              const percent = examProgress(exam.id);
-              return <div className="exam-total-progress">
-                <div className="exam-total-copy"><b>Total Progress</b><span>{done}/{total} topics</span></div>
-                <div className="exam-total-line"><i style={{width:`${percent}%`}} /></div>
-                <strong>{percent}%</strong>
-              </div>;
-            })()}
+            <div className="home-exam-content">
+              {(() => {
+                const topicIds = [...new Set(exam.categories.flatMap(c => c.topicIds))];
+                const total = topicIds.length;
+                const done = topicIds.filter(id => completed.has(id)).length;
+                const percent = examProgress(exam.id);
+                return <>
+                  <div className="home-exam-title">
+                    <span className="home-exam-name">{exam.name}</span>
+                    <button className="exam-info-button" type="button" aria-label={`Information about ${exam.name}`} title={`About ${exam.name}`} onClick={e => { e.stopPropagation(); setInfoExamId(exam.id); }} onKeyDown={e => e.stopPropagation()}><Info size={13}/></button>
+                    <div className="exam-total-copy"><b>Total Progress</b><span>{done}/{total} topics</span></div>
+                    <strong className="exam-title-percent">{percent}%</strong>
+                  </div>
+                  <div className="exam-total-line"><i style={{width:`${percent}%`}} /></div>
+                </>;
+              })()}
+            </div>
           </div>
         </div>
         <SubjectOverview exam={exam} completed={completed} onOpen={onOpen} />
       </div>)}
     </div>
+
+    {infoExam && <div className="exam-info-backdrop" onMouseDown={() => setInfoExamId(null)}>
+      <section className="exam-info-modal" role="dialog" aria-modal="true" aria-label={`${infoExam.name} information`} onMouseDown={e => e.stopPropagation()}>
+        <header className="exam-info-head"><div><span className={`exam-info-logo exam-${infoExam.id}`}><ExamIcon examId={infoExam.id}/></span><div><h2>{infoExam.name}</h2><p>{infoExam.description}</p></div></div><button className="modal-close" onClick={() => setInfoExamId(null)} aria-label="Close information"><X size={18}/></button></header>
+        <h3>Stages and subjects</h3>
+        <div className="exam-info-stages">{Array.from(new Map(infoExam.categories.map(category => [category.stage, infoExam.categories.filter(item => item.stage === category.stage)])).entries()).map(([stage, categories]) => <div className="exam-info-stage" key={stage}><b>{stage}</b><p>{[...new Set(categories.map(category => category.name))].join(" · ")}</p></div>)}</div>
+      </section>
+    </div>}
 
     {selectorOpen && <div className="selector-backdrop" onMouseDown={closeSelector}>
       <div className="selector-modal" role="dialog" aria-modal="true" aria-label="Select exams" onMouseDown={e=>e.stopPropagation()}>

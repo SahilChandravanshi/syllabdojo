@@ -576,3 +576,73 @@ h1 span{color:var(--text)}
 @media(max-width:759px){
   .selector-modal{width:100vw!important;border-radius:28px 28px 0 0!important}
 }
+
+/* v27: compact exam header; logo, title and progress align in one horizontal band. */
+.home-exam-heading{display:block;padding:17px}
+.home-exam-main{width:100%;display:grid!important;grid-template-columns:50px minmax(0,1fr);align-items:center;gap:13px;text-align:left;color:inherit;background:transparent;border:0;padding:0;cursor:pointer}
+.home-exam-content{display:grid;min-width:0;gap:4px}
+.home-exam-title{position:relative;display:grid;grid-template-columns:minmax(0,1fr);align-items:center;row-gap:2px;min-width:0;padding-right:38px}
+.home-exam-title .home-exam-name{grid-column:1;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px;letter-spacing:-.45px;color:var(--text);font-weight:850}
+.home-exam-title .home-exam-description{grid-column:1;display:block;color:var(--muted);font-size:8px;margin-top:0;font-weight:600}
+.home-exam-overall{display:none}
+.exam-total-progress{grid-template-columns:minmax(0,1fr) auto;gap:3px 8px;align-items:center}
+.exam-total-copy b{font-size:8px}.exam-total-copy span{font-size:7px}.exam-total-progress strong{font-size:10px}.exam-total-line{grid-column:1/-1;margin-top:0;height:4px;width:calc(100% + 63px);transform:translateX(-63px)}
+@media(max-width:600px){.home-exam-heading{padding:15px}.home-exam-main{grid-template-columns:44px minmax(0,1fr);gap:10px}.home-exam-heading .exam-icon{width:44px;height:44px;border-radius:13px}.home-exam-title .home-exam-name{font-size:14px}.home-exam-content{gap:4px}}
+
+/* Force heatmap activity levels to grayscale, matching its Less–More legend. */
+.app .analytics-heat .heat-cell,.app .heat-grid:not(.analytics-heat) .heat-cell{background:#e8e8e6!important;border-color:#d2d2cf!important}
+.app .analytics-heat .heat-cell.level-1,.app .heat-grid:not(.analytics-heat) .heat-cell.level-1{background:#cfcfcd!important;border-color:#c2c2bf!important}
+.app .analytics-heat .heat-cell.level-2,.app .heat-grid:not(.analytics-heat) .heat-cell.level-2{background:#a3a3a0!important;border-color:#969693!important}
+.app .analytics-heat .heat-cell.level-3,.app .heat-grid:not(.analytics-heat) .heat-cell.level-3{background:#666662!important;border-color:#5b5b58!important}
+.app .analytics-heat .heat-cell.level-4,.app .heat-grid:not(.analytics-heat) .heat-cell.level-4{background:#171717!important;border-color:#171717!important}
+.app.dark .analytics-heat .heat-cell,.app.dark .heat-grid:not(.analytics-heat) .heat-cell{background:#292929!important;border-color:#3a3a3a!important}
+.app.dark .analytics-heat .heat-cell.level-1,.app.dark .heat-grid:not(.analytics-heat) .heat-cell.level-1{background:#3b3b3b!important;border-color:#484848!important}
+.app.dark .analytics-heat .heat-cell.level-2,.app.dark .heat-grid:not(.analytics-heat) .heat-cell.level-2{background:#555555!important;border-color:#626262!important}
+.app.dark .analytics-heat .heat-cell.level-3,.app.dark .heat-grid:not(.analytics-heat) .heat-cell.level-3{background:#797979!important;border-color:#858585!important}
+.app.dark .analytics-heat .heat-cell.level-4,.app.dark .heat-grid:not(.analytics-heat) .heat-cell.level-4{background:#eeeeee!important;border-color:#eeeeee!important}
+
+/* v28: compact exam card header with optional exam details. */
+.home-exam-main{width:100%;display:grid!important;grid-template-columns:50px minmax(0,1fr);align-items:center;gap:13px;text-align:left;color:inherit;background:transparent;border:0;padding:0;cursor:pointer;min-width:0}
+.home-exam-main:focus-visible{outline:2px solid var(--text);outline-offset:4px;border-radius:12px}
+.home-exam-content{display:grid;min-width:0;gap:5px;padding-right:0}
+.home-exam-title{position:relative;display:flex;align-items:center;gap:6px;min-width:0;padding-right:0;min-height:20px;line-height:20px}
+.home-exam-title .home-exam-name{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px;letter-spacing:-.45px;color:var(--text);font-weight:850;line-height:1.15}
+.home-exam-title .home-exam-description{display:none!important}
+.exam-info-button{width:20px;height:20px;flex:none;align-self:center;display:grid;place-items:center;border:1px solid var(--line-strong);border-radius:50%;background:var(--panel-muted);color:var(--muted);padding:0;cursor:pointer}
+.exam-info-button:hover,.exam-info-button:focus-visible{color:var(--text);background:var(--line);outline:none}
+.exam-total-progress{grid-template-columns:minmax(0,1fr) auto;gap:3px 8px;align-items:center;min-width:0}
+.exam-total-copy b{font-size:8px}.exam-total-copy span{font-size:7px}.exam-total-progress strong{font-size:10px}.exam-total-line{grid-column:1/-1;margin-top:0;height:4px;width:calc(100% + 63px);transform:translateX(-63px)}
+.exam-info-backdrop{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(18,18,18,.34);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.exam-info-modal{width:min(480px,100%);max-height:min(82vh,680px);overflow:auto;padding:20px;border:1px solid var(--line);border-radius:24px;background:var(--panel);color:var(--text);box-shadow:0 22px 70px rgba(0,0,0,.22)}
+.exam-info-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}.exam-info-head>div{display:flex;align-items:center;gap:12px;min-width:0}.exam-info-logo{width:46px;height:46px;flex:none;display:grid;place-items:center;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--panel-soft)}.exam-info-head h2{font-size:18px;line-height:1.15;margin:0 0 4px;font-weight:850}.exam-info-head p{font-size:10px;color:var(--muted);margin:0}.exam-info-summary{font-size:11px;line-height:1.6;color:var(--text-2);margin:0 0 18px}.exam-info-modal h3{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:0 0 9px}.exam-info-stages{display:grid;gap:8px;margin-bottom:18px}.exam-info-stage{padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:var(--panel-soft)}.exam-info-stage b{display:block;font-size:10px;margin-bottom:5px}.exam-info-stage p{font-size:9px;line-height:1.5;color:var(--muted);margin:0}
+@media(max-width:600px){.home-exam-heading{padding:15px}.home-exam-main{grid-template-columns:44px minmax(0,1fr);gap:10px}.home-exam-heading .exam-icon{width:44px;height:44px;border-radius:13px}.home-exam-content{gap:5px;padding-right:0}.home-exam-title .home-exam-name{font-size:14px}.exam-total-line{width:calc(100% + 54px);transform:translateX(-54px)}.exam-info-backdrop{align-items:flex-end;padding:0}.exam-info-modal{width:100%;max-height:82vh;border-radius:24px 24px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom))}}
+
+/* v31: keep the exam title and progress bar beside the logo in one compact row. */
+.home-exam-heading{padding:17px!important}
+.home-exam-main{grid-template-columns:50px minmax(0,1fr)!important;align-items:center!important;gap:13px!important}
+.home-exam-content{display:flex!important;flex-direction:column!important;justify-content:center!important;gap:5px!important;min-width:0!important;padding:0!important}
+.home-exam-title{display:flex!important;align-items:center!important;gap:6px!important;min-height:20px!important;line-height:20px!important;padding:0!important;position:static!important}
+.home-exam-title .home-exam-name{display:block!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;line-height:20px!important}
+.exam-info-button{width:20px!important;height:20px!important;align-self:center!important;flex:none!important;margin:0!important;transform:none!important}
+.exam-total-progress{display:block!important;position:relative!important;min-width:0!important;width:100%!important;margin:0!important;padding:0!important;line-height:1!important}
+.exam-total-copy,.exam-total-progress>strong{display:block!important}
+.exam-total-progress{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:3px 8px!important}
+.exam-total-copy{min-width:0!important;white-space:nowrap!important}
+.exam-total-copy b{font-size:8px!important}
+.exam-total-copy span{font-size:7px!important;margin-left:5px!important}
+.exam-total-progress>strong{font-size:10px!important;text-align:right!important;line-height:1!important}
+.exam-total-line{display:block!important;grid-column:1/-1!important;width:100%!important;max-width:100%!important;margin:0!important;transform:none!important;height:4px!important}
+@media(max-width:600px){.home-exam-heading{padding:15px!important}.home-exam-main{grid-template-columns:44px minmax(0,1fr)!important;gap:10px!important}.home-exam-content{gap:5px!important}.exam-total-line{width:100%!important;transform:none!important}}
+
+
+/* v33: place progress summary on the title row, immediately before percentage. */
+.home-exam-content{display:flex!important;flex-direction:column!important;justify-content:center!important;gap:7px!important;min-width:0!important;padding:0!important}
+.home-exam-title{display:flex!important;align-items:center!important;gap:5px!important;min-width:0!important;min-height:20px!important;line-height:20px!important;padding:0!important;position:static!important}
+.home-exam-title .home-exam-name{flex:0 1 auto!important;min-width:0!important;max-width:48%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;line-height:20px!important}
+.exam-info-button{width:20px!important;height:20px!important;align-self:center!important;flex:none!important;margin:0!important}
+.exam-total-copy{display:flex!important;align-items:baseline!important;gap:4px!important;min-width:0!important;margin-left:auto!important;white-space:nowrap!important}
+.exam-total-copy b{font-size:8px!important;font-weight:750!important;white-space:nowrap!important}
+.exam-total-copy span{font-size:7px!important;margin:0!important;white-space:nowrap!important}
+.exam-title-percent{flex:none!important;font-size:10px!important;line-height:1!important;text-align:right!important}
+.exam-total-line{display:block!important;width:100%!important;max-width:100%!important;height:4px!important;margin:0!important;transform:none!important;border-radius:999px!important;overflow:hidden!important}
+@media(max-width:600px){.home-exam-content{gap:7px!important}.home-exam-title .home-exam-name{font-size:13px!important;max-width:40%!important}.exam-total-copy b{font-size:7px!important}.exam-total-copy span{font-size:6.5px!important}.exam-title-percent{font-size:9px!important}}
