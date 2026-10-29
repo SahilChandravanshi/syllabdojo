@@ -61,6 +61,40 @@ function App() {
   const [toast, setToast] = useState("");
   const [theme, setTheme] = useState<"dark"|"light">(loadTheme);
 
+  // Keep in-app navigation in browser history so Back returns to the previous app screen.
+  useEffect(() => {
+    const current = { screen, selectedExam, openCategory, syllabdojo: true };
+    window.history.replaceState(current, "", window.location.href);
+    window.history.pushState(current, "", window.location.href);
+    const onPopState = (event: PopStateEvent) => {
+      const state = event.state;
+      if (state?.syllabdojo && ["home", "exam", "analytics", "more"].includes(state.screen)) {
+        setScreen(state.screen);
+        if (typeof state.selectedExam === "string" && EXAMS.some(e => e.id === state.selectedExam)) setSelectedExam(state.selectedExam);
+        setOpenCategory(typeof state.openCategory === "string" ? state.openCategory : null);
+        // Keep Back on the dashboard inside the app rather than leaving the site.
+        if (state.screen === "home") window.history.pushState(state, "", window.location.href);
+      } else {
+        setScreen("home");
+        setOpenCategory(null);
+        const homeState = { screen: "home", selectedExam, openCategory: null, syllabdojo: true };
+        window.history.pushState(homeState, "", window.location.href);
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+    // Register once; event state carries the destination.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function navigate(nextScreen: "home"|"exam"|"analytics"|"more", nextExam = selectedExam, nextCategory: string | null = openCategory) {
+    const state = { screen: nextScreen, selectedExam: nextExam, openCategory: nextCategory, syllabdojo: true };
+    window.history.pushState(state, "", window.location.href);
+    setSelectedExam(nextExam);
+    setOpenCategory(nextCategory);
+    setScreen(nextScreen);
+  }
+
   // Lock the document while the exam picker sheet is open so the page behind it cannot scroll.
   useEffect(() => {
     if (!examSelectorOpen) return;
@@ -153,7 +187,7 @@ function App() {
   return (
     <div className={`app ${theme}`}>
       <header className="topbar">
-        <button className="brand" onClick={()=>setScreen("home")}>
+        <button className="brand" onClick={()=>navigate("home", selectedExam, null)}>
           <span className="brand-mark">S</span>
           <span>Syllab<span>Dojo</span></span>
         </button>
@@ -163,16 +197,16 @@ function App() {
       </header>
 
       <main>
-        {screen==="home" && <HomeScreen completed={completed} globalProgress={globalProgress} examProgress={examProgress} onOpen={(id, category)=>{setSelectedExam(id);setScreen("exam");setOpenCategory(category || null)}} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} />}
-        {screen==="exam" && <ExamScreen examId={selectedExam} completed={completed} progress={examProgress(selectedExam)} openCategory={openCategory} setOpenCategory={setOpenCategory} toggleTopic={toggleTopic} back={()=>setScreen("home")} />}
-        {screen==="analytics" && <Analytics store={store} completed={completed} examProgress={examProgress} back={()=>setScreen("home")} />}
+        {screen==="home" && <HomeScreen completed={completed} globalProgress={globalProgress} examProgress={examProgress} onOpen={(id, category)=>navigate("exam", id, category || null)} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} />}
+        {screen==="exam" && <ExamScreen examId={selectedExam} completed={completed} progress={examProgress(selectedExam)} openCategory={openCategory} setOpenCategory={setOpenCategory} toggleTopic={toggleTopic} back={()=>navigate("home", selectedExam, null)} />}
+        {screen==="analytics" && <Analytics store={store} completed={completed} examProgress={examProgress} back={()=>navigate("home", selectedExam, null)} />}
         {screen==="more" && <MoreScreen exportData={exportData} reset={reset} importData={importData} />}
       </main>
 
       <nav className="bottom-nav">
-        <button className={screen==="home" || screen==="exam" ? "nav-item selected":"nav-item"} onClick={()=>setScreen("home")}><Home size={20}/><span>Dashboard</span></button>
-        <button className={screen==="analytics"?"nav-item selected":"nav-item"} onClick={()=>setScreen("analytics")}><BarChart3 size={20}/><span>Analytics</span></button>
-        <button className={screen==="more"?"nav-item selected":"nav-item"} onClick={()=>setScreen("more")}><MoreHorizontal size={20}/><span>More</span></button>
+        <button className={screen==="home" || screen==="exam" ? "nav-item selected":"nav-item"} onClick={()=>navigate("home", selectedExam, null)}><Home size={20}/><span>Dashboard</span></button>
+        <button className={screen==="analytics"?"nav-item selected":"nav-item"} onClick={()=>navigate("analytics", selectedExam, null)}><BarChart3 size={20}/><span>Analytics</span></button>
+        <button className={screen==="more"?"nav-item selected":"nav-item"} onClick={()=>navigate("more", selectedExam, null)}><MoreHorizontal size={20}/><span>More</span></button>
       </nav>
 
       {toast && <div className="toast">{toast}</div>}
