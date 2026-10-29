@@ -646,3 +646,61 @@ h1 span{color:var(--text)}
 .exam-title-percent{flex:none!important;font-size:10px!important;line-height:1!important;text-align:right!important}
 .exam-total-line{display:block!important;width:100%!important;max-width:100%!important;height:4px!important;margin:0!important;transform:none!important;border-radius:999px!important;overflow:hidden!important}
 @media(max-width:600px){.home-exam-content{gap:7px!important}.home-exam-title .home-exam-name{font-size:13px!important;max-width:40%!important}.exam-total-copy b{font-size:7px!important}.exam-total-copy span{font-size:6.5px!important}.exam-title-percent{font-size:9px!important}}
+
+/* Analytics: GitHub-style, year-at-a-glance heatmaps using the existing monochrome palette. */
+.analytics-selector-card{margin-bottom:18px}
+.analytics-year-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 18px;color:var(--text);font-size:11px}
+.year-nav{display:grid;place-items:center;width:30px;height:30px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font-size:22px;line-height:1;cursor:pointer}
+.year-nav:disabled{opacity:.3;cursor:default}
+.exam-heat-section{margin-bottom:22px}
+.github-heat-card{overflow:hidden;padding:14px 12px}
+.github-months{display:grid;grid-template-rows:16px;gap:2px;margin:0 0 7px 29px;color:var(--muted);font-size:8px;min-width:0}
+.github-months span{white-space:nowrap}
+.github-heat-layout{display:grid;grid-template-columns:25px minmax(0,1fr);gap:4px}
+.github-weekdays{display:grid;grid-template-rows:repeat(7,11px);gap:3px;color:var(--muted);font-size:7px;align-items:center}
+.github-weekdays span:nth-child(1){grid-row:2}.github-weekdays span:nth-child(2){grid-row:4}.github-weekdays span:nth-child(3){grid-row:6}
+.github-heat-grid{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,11px);grid-auto-columns:minmax(0,1fr);gap:3px;min-width:0}
+.github-heat-grid .heat-cell{width:100%;height:11px;min-width:0;aspect-ratio:auto;border-radius:3px}
+@media(max-width:520px){.github-heat-card{padding:12px 8px}.github-months{margin-left:26px;font-size:7px}.github-heat-layout{grid-template-columns:22px minmax(0,1fr);gap:3px}.github-heat-grid{grid-template-rows:repeat(7,9px);gap:2px}.github-heat-grid .heat-cell{height:9px;border-radius:2px}.github-weekdays{grid-template-rows:repeat(7,9px);font-size:6px}}
+
+/* Analytics heatmap date filters and per-day topic details */
+.heatmap-periods{display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 10px}
+.heatmap-period{border:1px solid var(--line);border-radius:999px;padding:8px 12px;background:var(--panel);color:var(--muted);font:inherit;font-size:10px;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.heatmap-period.active{background:var(--text);border-color:var(--text);color:var(--bg)}
+.heatmap-help{color:var(--muted);font-size:9px;text-align:right}
+.github-heat-grid .heat-cell{padding:0;cursor:pointer}
+.github-heat-grid .heat-cell:disabled{cursor:default;opacity:.16}
+.github-heat-grid .heat-cell-selected{outline:2px solid var(--text);outline-offset:1px;position:relative;z-index:1}
+.heatmap-detail{margin-top:13px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--text)}
+.heatmap-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px}
+.heatmap-detail-head button{display:grid;place-items:center;width:25px;height:25px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);cursor:pointer}
+.heatmap-detail ul{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:7px}
+.heatmap-detail li{display:grid;gap:3px;padding:8px 9px;border-radius:9px;background:var(--panel);font-size:10px}
+.heatmap-detail li span{font-size:9px;color:var(--muted)}
+.heatmap-detail p{margin:8px 0 0;color:var(--muted);font-size:10px;line-height:1.5}
+@media(max-width:520px){.heatmap-periods{gap:5px}.heatmap-period{padding:7px 9px;font-size:9px}.analytics-year-controls{align-items:flex-start}.heatmap-help{max-width:48%}.heatmap-detail{padding:10px}}
+
+/* Analytics refinements: full weekday labels, floating topic popover, and syllabus shortcut. */
+.github-weekdays{grid-template-rows:repeat(7,11px)}
+.github-weekdays span{grid-row:auto!important;white-space:nowrap}
+.heat-title{display:flex;align-items:center;justify-content:flex-start;gap:12px}.heat-title-name{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap}.heat-title-name h2{margin:0}
+.heatmap-syllabus-button{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:var(--panel);color:var(--text);font:inherit;font-size:10px;cursor:pointer}
+.heatmap-syllabus-button:hover{background:var(--text);color:var(--bg)}
+.github-heat-card{position:relative}
+.heatmap-detail{position:absolute;z-index:20;top:38px;left:12px;right:auto;width:min(330px,calc(100% - 24px));max-height:260px;overflow:auto;margin:0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:0 12px 36px rgba(0,0,0,.18)}
+@media(max-width:520px){.github-weekdays{grid-template-rows:repeat(7,9px);font-size:6px}.heatmap-syllabus-button{padding:6px 8px;font-size:9px}.heat-title h2{font-size:14px}.heat-title-name{gap:7px}.heatmap-detail{top:32px;left:8px;right:auto;width:calc(100% - 16px);max-height:230px}}
+
+/* Keep analytics exam headings as dark/high-contrast as dashboard headings. */
+.heat-title-name h2{color:var(--text);opacity:1;font-weight:650}
+.heatmap-detail{position:fixed;left:12px;top:12px;right:auto;width:min(330px,calc(100vw - 24px));}
+
+
+/* v41: consistent exam chips and labeled bottom navigation. */
+.selected-exam-chips{align-items:center;gap:7px}
+.selected-exam-chip{box-sizing:border-box;min-height:35px;height:35px;padding:4px 11px 4px 5px;gap:7px;font-size:9px;line-height:1;flex:0 0 auto}
+.selected-exam-chip .chip-icon{width:25px;height:25px;min-width:25px;min-height:25px;flex:0 0 25px}
+.bottom-nav{width:min(360px,calc(100vw - 32px));height:58px;justify-content:stretch;gap:4px;padding:5px 7px}
+.nav-item{width:auto;min-width:0;height:46px;flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:999px;padding:0 9px;white-space:nowrap}
+.nav-item span{display:inline;font-size:10px;font-weight:650;letter-spacing:-.1px}
+.nav-item svg{width:17px;height:17px;flex:0 0 17px}
+@media(max-width:380px){.bottom-nav{width:calc(100vw - 20px);gap:2px;padding:4px}.nav-item{gap:4px;padding:0 5px}.nav-item span{font-size:9px}.selected-exam-chip{height:35px;min-height:35px;font-size:9px}}

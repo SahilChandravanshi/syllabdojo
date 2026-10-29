@@ -5,12 +5,14 @@ import { EXAMS, EXAM_TOPIC_IDS, TOPICS, DATA_VERSION } from "./data";
 type Store = {
   completed: string[];
   activity: Record<string, number>;
+  activityByExam?: Record<string, Record<string, number>>;
+  activityTopicsByExam?: Record<string, Record<string, string[]>>;
 };
 
 const KEY = "syllabdojo.progress.v1";
 const SELECTED_EXAMS_KEY = "syllabdojo.selected-exams.v1";
 const VIEW_STATE_KEY = "syllabdojo.view.v1";
-const emptyStore: Store = { completed: [], activity: {} };
+const emptyStore: Store = { completed: [], activity: {}, activityByExam: {} };
 
 function loadTheme(): "dark" | "light" {
   return localStorage.getItem("syllabdojo.theme") === "light" ? "light" : "dark";
@@ -41,7 +43,7 @@ function loadViewState() {
 function loadStore(): Store {
   try {
     const parsed = JSON.parse(localStorage.getItem(KEY) || "");
-    return { completed: Array.isArray(parsed.completed) ? parsed.completed : [], activity: parsed.activity || {} };
+    return { completed: Array.isArray(parsed.completed) ? parsed.completed : [], activity: parsed.activity || {}, activityByExam: parsed.activityByExam || {}, activityTopicsByExam: parsed.activityTopicsByExam || {} };
   } catch { return emptyStore; }
 }
 
@@ -134,13 +136,23 @@ function App() {
     localStorage.setItem(KEY, JSON.stringify(next));
   }
 
-  function toggleTopic(id: string) {
+  function toggleTopic(id: string, examId = selectedExam) {
     const next = new Set(store.completed);
     const wasDone = next.has(id);
     wasDone ? next.delete(id) : next.add(id);
     const activity = { ...store.activity };
-    if (!wasDone) activity[today()] = (activity[today()] || 0) + 1;
-    persist({ completed: [...next], activity });
+    const activityByExam = { ...(store.activityByExam || {}) };
+    const activityTopicsByExam = { ...(store.activityTopicsByExam || {}) };
+    if (!wasDone) {
+      activity[today()] = (activity[today()] || 0) + 1;
+      const examActivity = { ...(activityByExam[examId] || {}) };
+      examActivity[today()] = (examActivity[today()] || 0) + 1;
+      activityByExam[examId] = examActivity;
+      const examTopics = { ...(activityTopicsByExam[examId] || {}) };
+      examTopics[today()] = [...(examTopics[today()] || []), id];
+      activityTopicsByExam[examId] = examTopics;
+    }
+    persist({ completed: [...next], activity, activityByExam, activityTopicsByExam });
   }
 
   function reset() {
@@ -164,7 +176,7 @@ function App() {
         const parsed = JSON.parse(String(reader.result));
         if (!Array.isArray(parsed.completed)) throw new Error();
         const valid = parsed.completed.filter((id:string) => TOPICS.some(t=>t.id===id));
-        persist({ completed: valid, activity: parsed.activity || {} });
+        persist({ completed: valid, activity: parsed.activity || {}, activityByExam: parsed.activityByExam || {}, activityTopicsByExam: parsed.activityTopicsByExam || {} });
         notify("Progress imported");
       } catch { notify("Invalid progress file"); }
     };
@@ -198,8 +210,8 @@ function App() {
 
       <main>
         {screen==="home" && <HomeScreen completed={completed} globalProgress={globalProgress} examProgress={examProgress} onOpen={(id, category)=>navigate("exam", id, category || null)} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} />}
-        {screen==="exam" && <ExamScreen examId={selectedExam} completed={completed} progress={examProgress(selectedExam)} openCategory={openCategory} setOpenCategory={setOpenCategory} toggleTopic={toggleTopic} back={()=>navigate("home", selectedExam, null)} />}
-        {screen==="analytics" && <Analytics store={store} completed={completed} examProgress={examProgress} back={()=>navigate("home", selectedExam, null)} />}
+        {screen==="exam" && <ExamScreen examId={selectedExam} completed={completed} progress={examProgress(selectedExam)} openCategory={openCategory} setOpenCategory={setOpenCategory} toggleTopic={(id)=>toggleTopic(id, selectedExam)} back={()=>navigate("home", selectedExam, null)} />}
+        {screen==="analytics" && <Analytics store={store} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} completed={completed} onOpenExam={(id)=>navigate("exam",id,null)} />}
         {screen==="more" && <MoreScreen exportData={exportData} reset={reset} importData={importData} />}
       </main>
 
@@ -643,30 +655,74 @@ function ExamScreen({examId,completed,progress,openCategory,setOpenCategory,togg
   </section>
 }
 
-function Analytics({store,completed,examProgress,back}:{store:Store,completed:Set<string>,examProgress:(id:string)=>number,back:()=>void}) {
-  const recent = Object.entries(store.activity).sort(([a],[b])=>a.localeCompare(b)).slice(-7);
-  const totalActivity = Object.values(store.activity).reduce((a,b)=>a+b,0);
-  return <section className="page fade-in">
-    <div className="hero compact"><p className="eyebrow">ANALYTICS</p><h1>See your momentum.</h1><p className="sub">A simple view of progress and consistency. No clutter.</p></div>
-    <div className="analytics-stats">
-      <div><strong>{completed.size}</strong><span>topics completed</span></div>
-      <div><strong>{totalActivity}</strong><span>completion actions</span></div>
+function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorOpen,search,setSearch,completed,onOpenExam}:{store:Store,selectedExams:string[],toggleHomeExam:(id:string)=>void,selectorOpen:boolean,setSelectorOpen:(open:boolean)=>void,search:string,setSearch:(value:string)=>void,completed:Set<string>,onOpenExam:(id:string)=>void}) {
+  const [period, setPeriod] = useState<"12months"|"month"|"week">("12months");
+  const [activePill, setActivePill] = useState<{examId:string,date:string}|null>(null);
+  const [pinnedPill, setPinnedPill] = useState<{examId:string,date:string}|null>(null);
+  const [detailPosition, setDetailPosition] = useState<{left:number,top:number}|null>(null);
+  useEffect(() => {
+    if (!activePill) return;
+    const closeOnOutside = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      if (target.closest(".heatmap-detail") || target.closest(".github-heat-grid .heat-cell")) return;
+      setActivePill(null);
+      setPinnedPill(null);
+      setDetailPosition(null);
+    };
+    document.addEventListener("pointerdown", closeOnOutside);
+    return () => document.removeEventListener("pointerdown", closeOnOutside);
+  }, [activePill]);
+  const visibleExams = EXAMS.filter(exam => selectedExams.includes(exam.id));
+  const openSelector = () => { setSearch(""); setSelectorOpen(true); };
+  const filteredExams = EXAMS.filter(exam => exam.name.toLowerCase().includes(search.trim().toLowerCase()));
+  const now = new Date(); now.setHours(12,0,0,0);
+  let rangeStart = new Date(now), rangeEnd = new Date(now);
+  if (period === "12months") { rangeStart = new Date(now.getFullYear(), now.getMonth()-11, 1, 12); }
+  if (period === "month") { rangeStart = new Date(now.getFullYear(), now.getMonth()-1, 1, 12); rangeEnd = new Date(now.getFullYear(), now.getMonth(), 0, 12); }
+  if (period === "week") { rangeStart = new Date(now); rangeStart.setDate(now.getDate()-6); }
+  const gridStart = new Date(rangeStart); gridStart.setDate(gridStart.getDate()-gridStart.getDay());
+  const gridEnd = new Date(rangeEnd); gridEnd.setDate(gridEnd.getDate()+(6-gridEnd.getDay()));
+  const days: Date[] = [];
+  for (const d = new Date(gridStart); d <= gridEnd; d.setDate(d.getDate()+1)) days.push(new Date(d));
+  const monthLabels: {label:string,index:number}[] = [];
+  days.forEach((d,i) => { if (d.getDate() === 1 && d >= gridStart && d <= gridEnd) monthLabels.push({label:d.toLocaleDateString(undefined,{month:"short"}),index:i}); });
+  const periodLabel = period === "12months" ? "Last 12 months" : period === "month" ? rangeStart.toLocaleDateString(undefined,{month:"long",year:"numeric"}) : "Last 7 days";
+  function dateKey(d:Date) { return d.toISOString().slice(0,10); }
+  function topicsFor(examId:string,date:string) {
+    const ids = store.activityTopicsByExam?.[examId]?.[date] || [];
+    const exam = EXAMS.find(e=>e.id===examId);
+    return ids.map(id=>({id,topic:TOPICS.find(topic=>topic.id===id),subject:exam?.categories.find(c=>c.topicIds.includes(id))?.name || TOPICS.find(topic=>topic.id===id)?.category || "Syllabus"})).filter(x=>x.topic);
+  }
+  return <section className="page fade-in analytics-page">
+    <div className="hero compact"><p className="eyebrow">ANALYTICS</p><h1>Your consistency.</h1><p className="sub">Daily activity across the exams you’re preparing for.</p></div>
+    <div className="dashboard-selector-card analytics-selector-card">
+      <button className="dashboard-selector-label selector-title-button" onClick={openSelector} aria-haspopup="dialog"><span className="selector-title">My Exams</span><span className="selector-meta"><span className="selector-count">{visibleExams.length} selected</span><ChevronDown size={13} className="selector-dropdown-icon" aria-hidden="true" /></span></button>
+      <div className="selected-exam-chips">{visibleExams.map(exam=><div className="selected-exam-chip" key={exam.id}><span className={`chip-icon exam-chip-${exam.id}`}><ExamIcon examId={exam.id}/></span><span>{exam.name}</span></div>)}</div>
     </div>
-    <div className="section-head"><h2>Exam progress</h2></div>
-    <div className="analytics-list">
-      {EXAMS.map(exam=><div className="analytics-row" key={exam.id}><span>{exam.name}</span><b>{examProgress(exam.id)}%</b><div className="progress-bar"><i style={{width:`${examProgress(exam.id)}%`}}/></div></div>)}
-    </div>
-    <div className="section-head heat-title"><h2>Activity heatmap</h2></div>
-    <div className="heat-card">
-      <div className="heat-grid analytics-heat">
-        {Array.from({length:91},(_,i)=>{
-          const d=new Date(); d.setDate(d.getDate()-(90-i));
-          const date=d.toISOString().slice(0,10); const count=store.activity[date]||0;
-          return <div key={date} title={`${date}: ${count}`} className={`heat-cell level-${Math.min(4,count)}`}/>;
-        })}
-      </div>
-      <div className="heat-legend"><span>Less</span>{[0,1,2,3,4].map(x=><i key={x} className={`heat-cell level-${x}`}/>)}<span>More</span></div>
-    </div>
+    <div className="heatmap-periods" role="group" aria-label="Heatmap date range">{([{id:"12months",label:"Last 12 months"},{id:"month",label:"Last month"},{id:"week",label:"Last week"}] as const).map(item=><button key={item.id} className={period===item.id?"heatmap-period active":"heatmap-period"} onClick={()=>{setPeriod(item.id);setActivePill(null);setPinnedPill(null);setDetailPosition(null)}}>{item.label}</button>)}</div>
+    <div className="analytics-year-controls"><span>{periodLabel}</span><span className="heatmap-help">Select a pill to see completed topics</span></div>
+    {visibleExams.map(exam=>{
+      const examActivity = store.activityByExam?.[exam.id] || store.activity;
+      const selected = activePill?.examId===exam.id ? activePill.date : null;
+      const selectedTopics = selected ? topicsFor(exam.id,selected) : [];
+      return <section className="exam-heat-section" key={exam.id}>
+        <div className="section-head heat-title"><div className="heat-title-name"><h2>{exam.name}</h2><button className="heatmap-syllabus-button" onClick={()=>onOpenExam(exam.id)}>Open syllabus <span aria-hidden="true">↗</span></button></div></div>
+        <div className="heat-card github-heat-card">
+          <div className="github-months" style={{gridTemplateColumns:`repeat(${Math.ceil(days.length/7)}, minmax(0,1fr))`}}>{monthLabels.map((m,i)=><span key={`${m.label}-${m.index}-${i}`} style={{gridColumn:Math.floor(m.index/7)+1}}>{m.label}</span>)}</div>
+          <div className="github-heat-layout"><div className="github-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div><div className="github-heat-grid">{days.map(d=>{const date=dateKey(d);const inRange=d>=rangeStart&&d<=rangeEnd;const count=inRange?(examActivity[date] ?? store.activity[date] ?? 0):0;const isActive=selected===date;return <button type="button" key={date} disabled={!inRange} aria-label={`${exam.name}, ${date}, ${count} topics completed`} onClick={e=>{const next=isActive?null:{examId:exam.id,date};setActivePill(next);setPinnedPill(next);if(next){const r=e.currentTarget.getBoundingClientRect();const width=Math.min(330,window.innerWidth-24);const left=Math.max(12,Math.min(r.left,window.innerWidth-width-12));const estimatedHeight=190;const top=r.bottom+8+estimatedHeight<window.innerHeight?r.bottom+8:Math.max(12,r.top-estimatedHeight-8);setDetailPosition({left,top});}else{setDetailPosition(null)}}} title={`${date}: ${count} topics completed. Click for details.`} className={`heat-cell level-${Math.min(4,count)} ${!inRange?"heat-cell-outside":""} ${isActive?"heat-cell-selected":""}`} />;})}</div></div>
+          <div className="heat-legend"><span>Less</span>{[0,1,2,3,4].map(x=><i key={x} className={`heat-cell level-${x}`}/>)}<span>More</span></div>
+          {selected && <div className="heatmap-detail" style={detailPosition?{position:"fixed",left:detailPosition.left,top:detailPosition.top,right:"auto",bottom:"auto"}:undefined} role="status"><div className="heatmap-detail-head"><b>{new Date(`${selected}T12:00:00`).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric"})}</b><button onClick={()=>{setActivePill(null);setPinnedPill(null);setDetailPosition(null)}} aria-label="Close activity details"><X size={14}/></button></div>{selectedTopics.length ? <ul>{selectedTopics.map((item,i)=><li key={`${item.id}-${i}`}><span>{item.subject}</span><b>{item.topic.name}</b></li>)}</ul> : <p>No topic-completion details were saved for this date. New completions will appear here.</p>}</div>}
+        </div>
+      </section>;
+    })}
+    {!visibleExams.length && <div className="empty-state">Select at least one exam to view its activity heatmap.</div>}
+    {selectorOpen && <div className="selector-backdrop" onMouseDown={()=>setSelectorOpen(false)}><div className="selector-modal" role="dialog" aria-modal="true" aria-label="Select exams" onMouseDown={e=>e.stopPropagation()}>
+      <div className="selector-modal-head"><div><b>Select exams</b><span>{selectedExams.length} of {EXAMS.length} selected</span></div><button className="modal-close" onClick={()=>setSelectorOpen(false)} aria-label="Close"><X size={18}/></button></div>
+      <div className="selector-search"><Search size={15}/><input autoFocus value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search exams..." aria-label="Search exams"/>{search && <button aria-label="Clear search" onClick={()=>setSearch("")}><X size={14}/></button>}</div>
+      <div className="selector-options">{filteredExams.map(exam=>{const checked=selectedExams.includes(exam.id);return <button className="selector-option" key={exam.id} onClick={()=>toggleHomeExam(exam.id)}><span className={checked?"check selected-check":"check"}>{checked?<Check size={14}/>:null}</span><span className="selector-exam-icon"><ExamIcon examId={exam.id}/></span><span>{exam.name}</span></button>;})}{!filteredExams.length && <div className="selector-empty">No exams found.</div>}</div>
+      <button className="selector-done" onClick={()=>setSelectorOpen(false)}>Done</button>
+    </div></div>}
   </section>
 }
 
