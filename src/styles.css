@@ -809,3 +809,35 @@ h1 span{color:var(--text)}
   .analytics-year-controls .heatmap-periods{gap:5px}
   .analytics-year-controls .heatmap-help{width:auto;max-width:none;text-align:left;margin-left:0}
 }
+
+/* v51: keep official exam-logo artwork readable in both light and dark themes. */
+.exam-logo,
+.exam-icon,
+.selector-exam-icon,
+.selected-exam-chip .chip-icon,
+.tracker-logo-frame,
+.exam-info-logo {
+  background-color: #fff !important;
+}
+
+/* v52: rounded white logo tiles in exam-selection popups. */
+.selector-exam-icon {
+  width: 30px !important;
+  height: 30px !important;
+  flex: 0 0 30px !important;
+  box-sizing: border-box !important;
+  padding: 2px !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  overflow: hidden !important;
+  display: grid !important;
+  place-items: center !important;
+}
+.selector-option .selector-exam-icon .exam-logo {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  border-radius: 6px !important;
+}
