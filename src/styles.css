@@ -841,3 +841,85 @@ h1 span{color:var(--text)}
   object-fit: contain !important;
   border-radius: 6px !important;
 }
+
+
+/* v53: mobile 12-month heatmap uses fixed-width week columns and starts at the earliest month. */
+@media(max-width:700px){
+  .github-heat-scroll{
+    width:100%;
+    max-width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scroll-behavior:smooth;
+    direction:ltr;
+  }
+  .github-heat-grid.period-12months{
+    display:grid;
+    grid-auto-flow:column;
+    grid-template-columns:none !important;
+    grid-auto-columns:12px !important;
+    width:max-content !important;
+    min-width:0 !important;
+  }
+  .github-months.period-12months{
+    display:grid;
+    grid-auto-flow:column;
+    grid-template-columns:none !important;
+    grid-auto-columns:12px !important;
+    width:max-content !important;
+    min-width:0 !important;
+  }
+}
+
+
+/* v55: mobile 12-month view ends at today's date without trailing filler. */
+@media(max-width:700px){
+  .github-heat-grid.period-12months{
+    grid-auto-flow:column;
+    grid-template-rows:repeat(7,12px);
+    grid-auto-columns:12px;
+    width:max-content;
+    padding-right:0;
+    margin-right:0;
+  }
+  .github-heat-scroll{padding-right:0}
+}
+
+
+/* v58: keep mobile month headers on an explicit one-row week-column grid. */
+@media(max-width:700px){
+  .github-months.period-12months{
+    grid-auto-flow:row !important;
+    grid-template-rows:16px !important;
+    grid-auto-rows:16px !important;
+    align-items:start;
+  }
+  .github-months.period-12months > span{
+    grid-row:1 !important;
+    justify-self:start;
+    white-space:nowrap;
+  }
+}
+
+
+/* v59: mobile 12-month month labels must share the exact week-column tracks
+   used by the heatmap pills. Avoid fractional inline columns, which drift. */
+@media(max-width:700px){
+  .github-months.period-12months{
+    display:grid !important;
+    grid-auto-flow:column !important;
+    grid-template-columns:none !important;
+    grid-template-rows:16px !important;
+    grid-auto-columns:12px !important;
+    column-gap:3px !important;
+    width:max-content !important;
+    min-width:0 !important;
+    margin-left:0 !important;
+    margin-bottom:7px !important;
+  }
+  .github-months.period-12months > span{
+    grid-row:1 !important;
+    justify-self:start !important;
+    white-space:nowrap;
+  }
+}

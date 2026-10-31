@@ -661,6 +661,24 @@ function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorO
   const [pinnedPill, setPinnedPill] = useState<{examId:string,date:string}|null>(null);
   const [detailPosition, setDetailPosition] = useState<{left:number,top:number}|null>(null);
   useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      document.querySelectorAll<HTMLElement>(".github-heat-scroll").forEach(el => {
+        if (period !== "12months" || !window.matchMedia("(max-width:700px)").matches) {
+          el.scrollLeft = 0;
+          return;
+        }
+        // Focus the current month; earlier months remain available by scrolling left.
+        const today = new Date();
+        const firstOfRange = new Date(today.getFullYear(), today.getMonth() - 11, 1, 12);
+        firstOfRange.setDate(firstOfRange.getDate() - firstOfRange.getDay());
+        const firstOfCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1, 12);
+        const currentMonthWeek = Math.floor((firstOfCurrentMonth.getTime() - firstOfRange.getTime()) / (7 * 24 * 60 * 60 * 1000));
+        el.scrollLeft = currentMonthWeek * 15;
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [period]);
+  useEffect(() => {
     if (!activePill) return;
     const closeOnOutside = (event: PointerEvent) => {
       const target = event.target as HTMLElement | null;
@@ -682,11 +700,35 @@ function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorO
   if (period === "month") { rangeStart = new Date(now.getFullYear(), now.getMonth()-1, 1, 12); rangeEnd = new Date(now.getFullYear(), now.getMonth(), 0, 12); }
   if (period === "week") { rangeStart = new Date(now); rangeStart.setDate(now.getDate()-6); }
   const gridStart = new Date(rangeStart); gridStart.setDate(gridStart.getDate()-gridStart.getDay());
-  const gridEnd = new Date(rangeEnd); gridEnd.setDate(gridEnd.getDate()+(6-gridEnd.getDay()));
+  const mobile12Month = period === "12months" && window.matchMedia("(max-width:700px)").matches;
+  const gridEnd = new Date(rangeEnd);
+  // Mobile 12-month view ends at today exactly; never add future-day filler cells.
+  if (!mobile12Month) gridEnd.setDate(gridEnd.getDate()+(6-gridEnd.getDay()));
   const days: Date[] = [];
-  for (const d = new Date(gridStart); d <= gridEnd; d.setDate(d.getDate()+1)) days.push(new Date(d));
+  for (let d = new Date(gridStart); d <= gridEnd && (!mobile12Month || d <= now); d.setDate(d.getDate()+1)) {
+    days.push(new Date(d));
+  }
   const monthLabels: {label:string,index:number}[] = [];
-  days.forEach((d,i) => { if (d.getDate() === 1 && d >= gridStart && d <= gridEnd) monthLabels.push({label:d.toLocaleDateString(undefined,{month:"short"}),index:i}); });
+  if (mobile12Month) {
+    // Anchor each label to the Sunday that starts the first full week of that month.
+    // Compute the week column from calendar-day distance, not the rendered day-array
+    // index, so horizontal scrolling and the column-first mobile grid cannot shift it.
+    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+      const monthStart = new Date(rangeStart.getFullYear(), rangeStart.getMonth() + monthOffset, 1, 12);
+      const firstSunday = new Date(monthStart);
+      firstSunday.setDate(1 + ((7 - monthStart.getDay()) % 7));
+      if (firstSunday > now || firstSunday < gridStart || firstSunday > gridEnd) continue;
+      const dayDistance = Math.round((firstSunday.getTime() - gridStart.getTime()) / 86400000);
+      const weekColumn = Math.floor(dayDistance / 7);
+      monthLabels.push({label:monthStart.toLocaleDateString(undefined,{month:"short"}),index:weekColumn * 7});
+    }
+  } else {
+    days.forEach((d,i) => {
+      if (d.getDate() === 1 && d >= gridStart && d <= gridEnd) {
+        monthLabels.push({label:d.toLocaleDateString(undefined,{month:"short"}),index:i});
+      }
+    });
+  }
   const periodLabel = period === "12months" ? "Last 12 months" : period === "month" ? rangeStart.toLocaleDateString(undefined,{month:"long",year:"numeric"}) : "Last 7 days";
   function dateKey(d:Date) { return d.toISOString().slice(0,10); }
   function topicsFor(examId:string,date:string) {
@@ -709,7 +751,7 @@ function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorO
       return <section className="exam-heat-section" key={exam.id}>
         <div className="section-head heat-title"><div className="heat-title-name"><h2>{exam.name}</h2><button className="heatmap-syllabus-button" onClick={()=>onOpenExam(exam.id)}>Open syllabus <span aria-hidden="true">↗</span></button></div></div>
         <div className="heat-card github-heat-card">
-          <div className="github-heat-layout"><div className="github-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div><div className="github-heat-scroll"><div className={`github-months period-${period}`} style={{gridTemplateColumns:`repeat(${Math.ceil(days.length/7)}, minmax(0, 1fr))`}}>{monthLabels.map((m,i)=><span key={`${m.label}-${m.index}-${i}`} style={{gridColumn:Math.floor(m.index/7)+1}}>{m.label}</span>)}</div><div className={`github-heat-grid period-${period}`} style={{gridTemplateColumns:`repeat(${Math.ceil(days.length/7)}, minmax(0, 1fr))`}}>{days.map(d=>{const date=dateKey(d);const inRange=d>=rangeStart&&d<=rangeEnd;const count=inRange?(examActivity[date] ?? store.activity[date] ?? 0):0;const isActive=selected===date;return <button type="button" key={date} disabled={!inRange} aria-label={`${exam.name}, ${date}, ${count} topics completed`} onClick={e=>{const next=isActive?null:{examId:exam.id,date};setActivePill(next);setPinnedPill(next);if(next){const r=e.currentTarget.getBoundingClientRect();const width=Math.min(330,window.innerWidth-24);const left=Math.max(12,Math.min(r.left,window.innerWidth-width-12));const estimatedHeight=190;const top=r.bottom+8+estimatedHeight<window.innerHeight?r.bottom+8:Math.max(12,r.top-estimatedHeight-8);setDetailPosition({left,top});}else{setDetailPosition(null)}}} title={`${date}: ${count} topics completed. Click for details.`} className={`heat-cell level-${Math.min(4,count)} ${!inRange?"heat-cell-outside":""} ${isActive?"heat-cell-selected":""}`} />;})}</div></div></div>
+          <div className="github-heat-layout"><div className="github-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div><div className="github-heat-scroll"><div className={`github-months period-${period}`} style={mobile12Month ? {gridTemplateColumns:"none"} : {gridTemplateColumns:`repeat(${Math.ceil(days.length/7)}, minmax(0, 1fr))`}}>{monthLabels.map((m,i)=><span key={`${m.label}-${m.index}-${i}`} style={{gridColumnStart:mobile12Month ? Math.floor(m.index/7)+1 : Math.floor(m.index/7)+1,gridRowStart:1}}>{m.label}</span>)}</div><div className={`github-heat-grid period-${period}`} style={{gridTemplateColumns:`repeat(${Math.ceil(days.length/7)}, minmax(0, 1fr))`}}>{days.map(d=>{const date=dateKey(d);const inRange=d>=rangeStart&&d<=rangeEnd;const count=inRange?(examActivity[date] ?? store.activity[date] ?? 0):0;const isActive=selected===date;return <button type="button" key={date} disabled={!inRange} aria-label={`${exam.name}, ${date}, ${count} topics completed`} onClick={e=>{const next=isActive?null:{examId:exam.id,date};setActivePill(next);setPinnedPill(next);if(next){const r=e.currentTarget.getBoundingClientRect();const width=Math.min(330,window.innerWidth-24);const left=Math.max(12,Math.min(r.left,window.innerWidth-width-12));const estimatedHeight=190;const top=r.bottom+8+estimatedHeight<window.innerHeight?r.bottom+8:Math.max(12,r.top-estimatedHeight-8);setDetailPosition({left,top});}else{setDetailPosition(null)}}} title={`${date}: ${count} topics completed. Click for details.`} className={`heat-cell level-${Math.min(4,count)} ${!inRange?"heat-cell-outside":""} ${isActive?"heat-cell-selected":""}`} />;})}</div></div></div>
           <div className="heat-legend"><span>Less</span>{[0,1,2,3,4].map(x=><i key={x} className={`heat-cell level-${x}`}/>)}<span>More</span></div>
           {selected && <div className="heatmap-detail" style={detailPosition?{position:"fixed",left:detailPosition.left,top:detailPosition.top,right:"auto",bottom:"auto"}:undefined} role="status"><div className="heatmap-detail-head"><b>{new Date(`${selected}T12:00:00`).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric"})}</b><button onClick={()=>{setActivePill(null);setPinnedPill(null);setDetailPosition(null)}} aria-label="Close activity details"><X size={14}/></button></div>{selectedTopics.length ? <ul>{selectedTopics.map((item,i)=><li key={`${item.id}-${i}`}><span>{item.subject}</span><b>{item.topic?.name ?? "Topic"}</b></li>)}</ul> : <p>No topic-completion details were saved for this date. New completions will appear here.</p>}</div>}
         </div>
