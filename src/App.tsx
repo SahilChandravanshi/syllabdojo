@@ -59,6 +59,8 @@ function App() {
   const [selectedExams, setSelectedExams] = useState<string[]>(loadSelectedExams);
   const [examSelectorOpen, setExamSelectorOpen] = useState(false);
   const [examSearch, setExamSearch] = useState("");
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetExamIds, setResetExamIds] = useState<string[]>([]);
   const [openCategory, setOpenCategory] = useState<string | null>(initialView.openCategory);
   const [toast, setToast] = useState("");
   const [theme, setTheme] = useState<"dark"|"light">(loadTheme);
@@ -155,9 +157,43 @@ function App() {
     persist({ completed: [...next], activity, activityByExam, activityTopicsByExam });
   }
 
-  function reset() {
-    if (!confirm("Reset all progress? This cannot be undone unless you have an export.")) return;
-    persist(emptyStore);
+  function openResetDialog() {
+    setResetExamIds([]);
+    setResetDialogOpen(true);
+  }
+
+  function toggleResetExam(id: string) {
+    setResetExamIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  }
+
+  function resetProgress(examIds: string[]) {
+    if (examIds.length === EXAMS.length) {
+      persist(emptyStore);
+      notify("All exam progress reset");
+      setResetDialogOpen(false);
+      return;
+    }
+
+    const resetTopicIds = new Set(examIds.flatMap(id => EXAM_TOPIC_IDS[id] || []));
+    const nextCompleted = store.completed.filter(id => !resetTopicIds.has(id));
+    const nextActivityByExam = { ...(store.activityByExam || {}) };
+    const nextActivityTopicsByExam = { ...(store.activityTopicsByExam || {}) };
+    examIds.forEach(id => {
+      delete nextActivityByExam[id];
+      delete nextActivityTopicsByExam[id];
+    });
+
+    // Global activity is legacy aggregate data and cannot be attributed safely to
+    // individual exams. Clear it on a partial reset to avoid showing stale activity
+    // for an exam whose history was just reset.
+    persist({
+      completed: nextCompleted,
+      activity: {},
+      activityByExam: nextActivityByExam,
+      activityTopicsByExam: nextActivityTopicsByExam
+    });
+    setResetDialogOpen(false);
+    notify(`${examIds.length} exam${examIds.length === 1 ? "" : "s"} reset`);
   }
 
   function exportData() {
@@ -212,7 +248,7 @@ function App() {
         {screen==="home" && <HomeScreen completed={completed} globalProgress={globalProgress} examProgress={examProgress} onOpen={(id, category)=>navigate("exam", id, category || null)} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} />}
         {screen==="exam" && <ExamScreen examId={selectedExam} completed={completed} progress={examProgress(selectedExam)} openCategory={openCategory} setOpenCategory={setOpenCategory} toggleTopic={(id)=>toggleTopic(id, selectedExam)} back={()=>navigate("home", selectedExam, null)} />}
         {screen==="analytics" && <Analytics store={store} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} completed={completed} onOpenExam={(id)=>navigate("exam",id,null)} />}
-        {screen==="more" && <MoreScreen exportData={exportData} reset={reset} importData={importData} />}
+        {screen==="more" && <MoreScreen exportData={exportData} reset={openResetDialog} importData={importData} />}
       </main>
 
       <nav className="bottom-nav">
@@ -221,6 +257,36 @@ function App() {
         <button className={screen==="more"?"nav-item selected":"nav-item"} onClick={()=>navigate("more", selectedExam, null)}><MoreHorizontal size={20}/><span>More</span></button>
       </nav>
 
+      {resetDialogOpen && <div className="reset-backdrop" role="presentation" onMouseDown={event => {
+        if (event.target === event.currentTarget) setResetDialogOpen(false);
+      }}>
+        <section className="reset-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-dialog-title">
+          <div className="reset-dialog-heading">
+            <div className="reset-dialog-icon"><RotateCcw size={19}/></div>
+            <button className="modal-close" onClick={() => setResetDialogOpen(false)} aria-label="Close reset dialog"><X size={17}/></button>
+          </div>
+          <h2 id="reset-dialog-title">Reset progress</h2>
+          <p className="reset-dialog-description">Choose which exam progress you want to clear. This cannot be undone unless you have an export.</p>
+          <label className={`reset-all-option ${resetExamIds.length === EXAMS.length ? "active" : ""}`}>
+            <input type="checkbox" checked={resetExamIds.length === EXAMS.length} onChange={() => setResetExamIds(resetExamIds.length === EXAMS.length ? [] : EXAMS.map(exam => exam.id))}/>
+            <span><b>All exams</b><small>Clear progress across every exam</small></span>
+          </label>
+          <div className="reset-exam-list">
+            {EXAMS.map(exam => <label className="reset-exam-option" key={exam.id}>
+              <input type="checkbox" checked={resetExamIds.includes(exam.id)} onChange={() => toggleResetExam(exam.id)}/>
+              <span className="reset-exam-logo"><ExamIcon examId={exam.id}/></span>
+              <span>{exam.name}</span>
+            </label>)}
+          </div>
+          <p className="reset-dialog-note">Topics shared between exams will also be reset wherever they appear.</p>
+          <div className="reset-dialog-actions">
+            <button className="reset-cancel" onClick={() => setResetDialogOpen(false)}>Cancel</button>
+            <button className="reset-confirm" disabled={!resetExamIds.length} onClick={() => resetProgress(resetExamIds)}>
+              Reset {resetExamIds.length === EXAMS.length ? "all" : resetExamIds.length ? `(${resetExamIds.length})` : "selected"}
+            </button>
+          </div>
+        </section>
+      </div>}
       {toast && <div className="toast">{toast}</div>}
     </div>
   );
@@ -243,12 +309,7 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
   }
 
   return <section className="page dashboard-page fade-in">
-    <div className="dashboard-hero">
-      <div>
-        <p className="eyebrow">SYLLABDOJO</p>
-        <h1>Stay on top of your <span>syllabus.</span></h1>
-        <p className="sub">A calm, simple way to track every topic across your exams.</p>
-      </div>
+    <div className="dashboard-hero dashboard-hero-compact">
       <div className="dashboard-stats">
         <div className="dashboard-stat"><strong>{selectedExams.length}</strong><span>exams</span></div>
         <div className="dashboard-stat"><strong>{completed.size}</strong><span>topics done</span></div>
@@ -323,11 +384,16 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
         <div className="selector-options">
           {filteredExams.map(exam=>{
             const checked=selectedExams.includes(exam.id);
-            return <button className="selector-option" key={exam.id} onClick={()=>toggleHomeExam(exam.id)}>
-              <span className={checked ? "check selected-check" : "check"}>{checked ? <Check size={14}/> : null}</span>
-              <span className="selector-exam-icon"><ExamIcon examId={exam.id}/></span>
-              <span>{exam.name}</span>
-            </button>;
+            return <div className="selector-option" key={exam.id}>
+              <button className="selector-option-main" onClick={()=>toggleHomeExam(exam.id)} aria-pressed={checked}>
+                <span className={checked ? "check selected-check" : "check"}>{checked ? <Check size={14}/> : null}</span>
+                <span className="selector-exam-icon"><ExamIcon examId={exam.id}/></span>
+                <span className="selector-option-name">{exam.name}</span>
+              </button>
+              <button className="selector-option-info" onClick={()=>setInfoExamId(exam.id)} aria-label={`About ${exam.name}`} title={`About ${exam.name}`}>
+                <Info size={15}/>
+              </button>
+            </div>;
           })}
           {!filteredExams.length && <div className="selector-empty">No exams found.</div>}
         </div>
@@ -592,7 +658,7 @@ function ExamScreen({examId,completed,progress,openCategory,setOpenCategory,togg
     <div className="tracker-hero">
       <div className="tracker-identity">
         <div className={`tracker-logo-frame tracker-logo-${exam.id}`}><ExamIcon examId={exam.id}/></div>
-        <div><p className="eyebrow">{exam.short}</p><h1>{exam.name}</h1><p>{exam.description}</p></div>
+        <div><h1>{exam.name}</h1><p>{exam.description}</p></div>
       </div>
       <div className="big-progress"><strong>{progress}%</strong><span>complete</span></div>
     </div>
@@ -737,7 +803,6 @@ function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorO
     return ids.map(id=>({id,topic:TOPICS.find(topic=>topic.id===id),subject:exam?.categories.find(c=>c.topicIds.includes(id))?.name || TOPICS.find(topic=>topic.id===id)?.category || "Syllabus"})).filter(x=>x.topic);
   }
   return <section className="page fade-in analytics-page">
-    <div className="hero compact"><p className="eyebrow">ANALYTICS</p><h1>Your consistency.</h1><p className="sub">Daily activity across the exams you’re preparing for.</p></div>
     <div className="dashboard-selector-card analytics-selector-card">
       <button className="dashboard-selector-label selector-title-button" onClick={openSelector} aria-haspopup="dialog"><span className="selector-title">My Exams</span><span className="selector-meta"><span className="selector-count">{visibleExams.length} selected</span><ChevronDown size={13} className="selector-dropdown-icon" aria-hidden="true" /></span></button>
       <div className="selected-exam-chips">{visibleExams.map(exam=><div className="selected-exam-chip" key={exam.id}><span className={`chip-icon exam-chip-${exam.id}`}><ExamIcon examId={exam.id}/></span><span>{exam.name}</span></div>)}</div>
@@ -770,7 +835,6 @@ function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorO
 
 function MoreScreen({exportData,reset,importData}:{exportData:()=>void,reset:()=>void,importData:(file:File)=>void}) {
   return <section className="page fade-in">
-    <div className="hero compact"><p className="eyebrow">MORE</p><h1>Keep it simple.</h1><p className="sub">Your data stays on your device. Use export/import to move your progress between devices.</p></div>
     <div className="settings-list">
       <button className="setting-row" onClick={exportData}><span className="setting-icon"><Download size={18}/></span><span><b>Export progress</b><small>Save a backup as a JSON file</small></span></button>
       <label className="setting-row"><span className="setting-icon"><Upload size={18}/></span><span><b>Import progress</b><small>Restore a previous JSON backup</small></span><input hidden type="file" accept="application/json" onChange={e=>e.target.files?.[0] && importData(e.target.files[0])}/></label>
