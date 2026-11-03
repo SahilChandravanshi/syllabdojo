@@ -54,7 +54,7 @@ function today() {
 function App() {
   const initialView = loadViewState();
   const [store, setStore] = useState<Store>(loadStore);
-  const [screen, setScreen] = useState<"home"|"exam"|"analytics"|"more">(initialView.screen);
+  const [screen, setScreen] = useState<"home"|"exam"|"analytics"|"more"|"support">(initialView.screen);
   const [selectedExam, setSelectedExam] = useState(initialView.selectedExam);
   const [selectedExams, setSelectedExams] = useState<string[]>(loadSelectedExams);
   const [examSelectorOpen, setExamSelectorOpen] = useState(false);
@@ -93,7 +93,7 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function navigate(nextScreen: "home"|"exam"|"analytics"|"more", nextExam = selectedExam, nextCategory: string | null = openCategory) {
+  function navigate(nextScreen: "home"|"exam"|"analytics"|"more"|"support", nextExam = selectedExam, nextCategory: string | null = openCategory) {
     const state = { screen: nextScreen, selectedExam: nextExam, openCategory: nextCategory, syllabdojo: true };
     window.history.pushState(state, "", window.location.href);
     setSelectedExam(nextExam);
