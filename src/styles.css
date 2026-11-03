@@ -1200,3 +1200,77 @@ h1 span{color:var(--text)}
   display:block!important;width:19px!important;height:19px!important;
   stroke:currentColor!important;fill:none!important;
 }
+
+
+/* v80 — Mobile reset dialogs use the same bottom-sheet treatment as exam selection. */
+@media (max-width: 620px) {
+  .reset-backdrop {
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+  }
+  .reset-dialog,
+  .reset-confirm-dialog {
+    position: relative;
+    width: 100%;
+    max-width: none;
+    max-height: min(88dvh, 780px);
+    padding: 16px 16px max(18px, env(safe-area-inset-bottom));
+    border-radius: 28px 28px 0 0;
+    border: 1px solid var(--line-strong);
+    border-bottom: 0;
+    background: var(--panel);
+    color: var(--text);
+    box-shadow: 0 -18px 70px var(--shadow-3);
+    animation: reset-sheet-in .22s ease-out;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .reset-dialog::before {
+    content: "";
+    display: block;
+    width: 38px;
+    height: 4px;
+    flex: 0 0 4px;
+    margin: -5px auto 16px;
+    border-radius: 999px;
+    background: var(--muted-2);
+    opacity: .8;
+  }
+  .reset-dialog h2 {
+    font-size: 16px;
+    letter-spacing: -.4px;
+  }
+  .reset-dialog-description {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .reset-all-option,
+  .reset-exam-option {
+    background: var(--panel-soft);
+    border-color: var(--line);
+    border-radius: 15px;
+  }
+  .reset-exam-list {
+    grid-template-columns: 1fr;
+    max-height: min(38dvh, 300px);
+  }
+  .reset-dialog-actions {
+    position: sticky;
+    bottom: calc(-1 * max(18px, env(safe-area-inset-bottom)));
+    padding: 12px 0 max(0px, env(safe-area-inset-bottom));
+    margin-top: 2px;
+    background: var(--panel);
+  }
+  .reset-dialog-actions button {
+    min-height: 42px;
+    font-size: 11px;
+  }
+  .reset-confirm-backdrop {
+    z-index: 130;
+  }
+}
+@keyframes reset-sheet-in {
+  from { transform: translateY(24px); opacity: .7; }
+  to { transform: translateY(0); opacity: 1; }
+}
