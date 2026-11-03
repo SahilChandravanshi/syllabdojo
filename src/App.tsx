@@ -61,6 +61,8 @@ function App() {
   const [examSearch, setExamSearch] = useState("");
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetExamIds, setResetExamIds] = useState<string[]>([]);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [resetPhrase, setResetPhrase] = useState("");
   const [openCategory, setOpenCategory] = useState<string | null>(initialView.openCategory);
   const [toast, setToast] = useState("");
   const [theme, setTheme] = useState<"dark"|"light">(loadTheme);
@@ -166,10 +168,23 @@ function App() {
     setResetExamIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   }
 
-  function resetProgress(examIds: string[]) {
-    if (examIds.length === EXAMS.length) {
-      persist(emptyStore);
-      notify("All exam progress reset");
+  function beginResetConfirmation() {
+    setResetPhrase("");
+    setResetConfirmOpen(true);
+  }
+
+  function confirmResetProgress() {
+    const examIds = resetExamIds;
+    if (selectedExams.length > 0 && examIds.length === selectedExams.length && selectedExams.every(id => examIds.includes(id))) {
+      const trackedTopicIds = new Set(selectedExams.flatMap(id => EXAM_TOPIC_IDS[id] || []));
+      persist({
+        ...store,
+        completed: store.completed.filter(id => !trackedTopicIds.has(id)),
+        activity: {},
+        activityByExam: Object.fromEntries(Object.entries(store.activityByExam || {}).filter(([id]) => !selectedExams.includes(id))),
+        activityTopicsByExam: Object.fromEntries(Object.entries(store.activityTopicsByExam || {}).filter(([id]) => !selectedExams.includes(id)))
+      });
+      notify("All tracked exam progress reset");
       setResetDialogOpen(false);
       return;
     }
@@ -261,29 +276,60 @@ function App() {
         if (event.target === event.currentTarget) setResetDialogOpen(false);
       }}>
         <section className="reset-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-dialog-title">
-          <div className="reset-dialog-heading">
-            <div className="reset-dialog-icon"><RotateCcw size={19}/></div>
+          <div className="reset-dialog-heading reset-dialog-heading-compact">
             <button className="modal-close" onClick={() => setResetDialogOpen(false)} aria-label="Close reset dialog"><X size={17}/></button>
           </div>
           <h2 id="reset-dialog-title">Reset progress</h2>
           <p className="reset-dialog-description">Choose which exam progress you want to clear. This cannot be undone unless you have an export.</p>
-          <label className={`reset-all-option ${resetExamIds.length === EXAMS.length ? "active" : ""}`}>
-            <input type="checkbox" checked={resetExamIds.length === EXAMS.length} onChange={() => setResetExamIds(resetExamIds.length === EXAMS.length ? [] : EXAMS.map(exam => exam.id))}/>
-            <span><b>All exams</b><small>Clear progress across every exam</small></span>
+          <label className={`reset-all-option ${selectedExams.length > 0 && resetExamIds.length === selectedExams.length ? "active" : ""}`}>
+            <input type="checkbox" checked={selectedExams.length > 0 && resetExamIds.length === selectedExams.length} onChange={() => setResetExamIds(resetExamIds.length === selectedExams.length ? [] : [...selectedExams])}/>
+            <span><b>All tracked exams</b><small>Clear progress across your selected exams</small></span>
           </label>
           <div className="reset-exam-list">
-            {EXAMS.map(exam => <label className="reset-exam-option" key={exam.id}>
+            {EXAMS.filter(exam => selectedExams.includes(exam.id)).map(exam => <label className="reset-exam-option" key={exam.id}>
               <input type="checkbox" checked={resetExamIds.includes(exam.id)} onChange={() => toggleResetExam(exam.id)}/>
               <span className="reset-exam-logo"><ExamIcon examId={exam.id}/></span>
               <span>{exam.name}</span>
             </label>)}
           </div>
-          <p className="reset-dialog-note">Topics shared between exams will also be reset wherever they appear.</p>
+          <p className="reset-dialog-note">Only exams selected in My Exams are shown. Shared topics are reset wherever they appear.</p>
           <div className="reset-dialog-actions">
             <button className="reset-cancel" onClick={() => setResetDialogOpen(false)}>Cancel</button>
-            <button className="reset-confirm" disabled={!resetExamIds.length} onClick={() => resetProgress(resetExamIds)}>
-              Reset {resetExamIds.length === EXAMS.length ? "all" : resetExamIds.length ? `(${resetExamIds.length})` : "selected"}
+            <button className="reset-confirm" disabled={!resetExamIds.length} onClick={beginResetConfirmation}>
+              Reset {resetExamIds.length === selectedExams.length && selectedExams.length > 0 ? "all" : resetExamIds.length ? `(${resetExamIds.length})` : "selected"}
             </button>
+          </div>
+        </section>
+      </div>}
+      {resetConfirmOpen && <div className="reset-backdrop reset-confirm-backdrop" role="presentation" onMouseDown={event => {
+        if (event.target === event.currentTarget) { setResetConfirmOpen(false); setResetPhrase(""); }
+      }}>
+        <section className="reset-dialog reset-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-confirm-title">
+          <div className="reset-dialog-heading reset-dialog-heading-compact">
+            <button className="modal-close" onClick={() => { setResetConfirmOpen(false); setResetPhrase(""); }} aria-label="Close confirmation"><X size={17}/></button>
+          </div>
+          <h2 id="reset-confirm-title">{resetExamIds.length === selectedExams.length && selectedExams.length > 0 ? "Reset all tracked exam progress?" : "Reset selected exams?"}</h2>
+          {resetExamIds.length === selectedExams.length && selectedExams.length > 0 ? <>
+            <p className="reset-dialog-description">This will clear progress for every exam you're currently tracking. This action cannot be undone.</p>
+            <label className="reset-phrase-label" htmlFor="reset-phrase-input">Type <b>reset all exams progress</b> to confirm</label>
+            <input id="reset-phrase-input" className="reset-phrase-input" value={resetPhrase} onChange={event => setResetPhrase(event.target.value)} placeholder="reset all exams progress" autoComplete="off"/>
+          </> : <>
+            <p className="reset-dialog-description">Are you sure you want to reset progress for these exams?</p>
+            <ul className="reset-confirm-exam-list">
+              {EXAMS.filter(exam => resetExamIds.includes(exam.id)).map(exam => <li key={exam.id}>{exam.name}</li>)}
+            </ul>
+            <p className="reset-dialog-description">This action cannot be undone.</p>
+            <label className="reset-phrase-label" htmlFor="reset-selected-phrase-input">Type <b>reset selected exams progress</b> to confirm</label>
+            <input id="reset-selected-phrase-input" className="reset-phrase-input" value={resetPhrase} onChange={event => setResetPhrase(event.target.value)} placeholder="reset selected exams progress" autoComplete="off"/>
+          </>}
+          <div className="reset-dialog-actions">
+            <button className="reset-cancel" onClick={() => { setResetConfirmOpen(false); setResetPhrase(""); }}>Cancel</button>
+            <button className="reset-confirm" disabled={resetExamIds.length === selectedExams.length && selectedExams.length > 0 ? resetPhrase !== "reset all exams progress" : resetPhrase !== "reset selected exams progress"} onClick={() => {
+              confirmResetProgress();
+              setResetConfirmOpen(false);
+              setResetDialogOpen(false);
+              setResetPhrase("");
+            }}>Confirm reset</button>
           </div>
         </section>
       </div>}
