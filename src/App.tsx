@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { BarChart3, Check, ChevronDown, Download, Home, Info, MoreHorizontal, Moon, RotateCcw, Search, Sun, Upload, X } from "lucide-react";
+import { BarChart3, Check, ChevronDown, Download, Home, Info, MoreHorizontal, Moon, RotateCcw, Search, Sun, Upload, X, Circle, CircleCheck, Heart, ArrowLeft, Smartphone } from "lucide-react";
 import { EXAMS, EXAM_TOPIC_IDS, TOPICS, DATA_VERSION } from "./data";
 
 type Store = {
@@ -263,7 +263,7 @@ function App() {
         {screen==="home" && <HomeScreen completed={completed} globalProgress={globalProgress} examProgress={examProgress} onOpen={(id, category)=>navigate("exam", id, category || null)} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} />}
         {screen==="exam" && <ExamScreen examId={selectedExam} completed={completed} progress={examProgress(selectedExam)} openCategory={openCategory} setOpenCategory={setOpenCategory} toggleTopic={(id)=>toggleTopic(id, selectedExam)} back={()=>navigate("home", selectedExam, null)} />}
         {screen==="analytics" && <Analytics store={store} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} completed={completed} onOpenExam={(id)=>navigate("exam",id,null)} />}
-        {screen==="more" && <MoreScreen exportData={exportData} reset={openResetDialog} importData={importData} />}
+        {screen==="more" && <MoreScreen exportData={exportData} reset={openResetDialog} importData={importData} onSupport={()=>navigate("support", selectedExam, null)} />}{screen==="support" && <SupportScreen onBack={()=>navigate("more", selectedExam, null)} /> }
       </main>
 
       <nav className="bottom-nav">
@@ -276,18 +276,17 @@ function App() {
         if (event.target === event.currentTarget) setResetDialogOpen(false);
       }}>
         <section className="reset-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-dialog-title">
-          <div className="reset-dialog-heading reset-dialog-heading-compact">
-            <button className="modal-close" onClick={() => setResetDialogOpen(false)} aria-label="Close reset dialog"><X size={17}/></button>
-          </div>
           <h2 id="reset-dialog-title">Reset progress</h2>
           <p className="reset-dialog-description">Choose which exam progress you want to clear. This cannot be undone unless you have an export.</p>
           <label className={`reset-all-option ${selectedExams.length > 0 && resetExamIds.length === selectedExams.length ? "active" : ""}`}>
-            <input type="checkbox" checked={selectedExams.length > 0 && resetExamIds.length === selectedExams.length} onChange={() => setResetExamIds(resetExamIds.length === selectedExams.length ? [] : [...selectedExams])}/>
+            <input className="reset-choice-input" type="checkbox" checked={selectedExams.length > 0 && resetExamIds.length === selectedExams.length} onChange={() => setResetExamIds(resetExamIds.length === selectedExams.length ? [] : [...selectedExams])}/>
+            <span className="reset-choice-icon" aria-hidden="true">{selectedExams.length > 0 && resetExamIds.length === selectedExams.length ? <CircleCheck size={19} strokeWidth={2.2}/> : <Circle size={19} strokeWidth={1.7}/>}</span>
             <span><b>All tracked exams</b><small>Clear progress across your selected exams</small></span>
           </label>
           <div className="reset-exam-list">
             {EXAMS.filter(exam => selectedExams.includes(exam.id)).map(exam => <label className="reset-exam-option" key={exam.id}>
-              <input type="checkbox" checked={resetExamIds.includes(exam.id)} onChange={() => toggleResetExam(exam.id)}/>
+              <input className="reset-choice-input" type="checkbox" checked={resetExamIds.includes(exam.id)} onChange={() => toggleResetExam(exam.id)}/>
+              <span className="reset-choice-icon" aria-hidden="true">{resetExamIds.includes(exam.id) ? <CircleCheck size={19} strokeWidth={2.2}/> : <Circle size={19} strokeWidth={1.7}/>}</span>
               <span className="reset-exam-logo"><ExamIcon examId={exam.id}/></span>
               <span>{exam.name}</span>
             </label>)}
@@ -305,9 +304,6 @@ function App() {
         if (event.target === event.currentTarget) { setResetConfirmOpen(false); setResetPhrase(""); }
       }}>
         <section className="reset-dialog reset-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-confirm-title">
-          <div className="reset-dialog-heading reset-dialog-heading-compact">
-            <button className="modal-close" onClick={() => { setResetConfirmOpen(false); setResetPhrase(""); }} aria-label="Close confirmation"><X size={17}/></button>
-          </div>
           <h2 id="reset-confirm-title">{resetExamIds.length === selectedExams.length && selectedExams.length > 0 ? "Reset all tracked exam progress?" : "Reset selected exams?"}</h2>
           {resetExamIds.length === selectedExams.length && selectedExams.length > 0 ? <>
             <p className="reset-dialog-description">This will clear progress for every exam you're currently tracking. This action cannot be undone.</p>
@@ -432,7 +428,9 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
             const checked=selectedExams.includes(exam.id);
             return <div className="selector-option" key={exam.id}>
               <button className="selector-option-main" onClick={()=>toggleHomeExam(exam.id)} aria-pressed={checked}>
-                <span className={checked ? "check selected-check" : "check"}>{checked ? <Check size={14}/> : null}</span>
+                <span className={checked ? "check selected-check circle-choice" : "check circle-choice"} aria-hidden="true">
+                  {checked ? <CircleCheck size={19} strokeWidth={2.2}/> : <Circle size={19} strokeWidth={1.7}/>}
+                </span>
                 <span className="selector-exam-icon"><ExamIcon examId={exam.id}/></span>
                 <span className="selector-option-name">{exam.name}</span>
               </button>
@@ -710,11 +708,6 @@ function ExamScreen({examId,completed,progress,openCategory,setOpenCategory,togg
     </div>
     <div className="progress-bar tracker-progress"><i style={{width:`${progress}%`}}/></div>
 
-    <div className="tracker-progress-card">
-      <div><b>Syllabus progress</b><span>Mark topics as completed to track your preparation.</span></div>
-      <strong>{progress}%</strong>
-    </div>
-
     <div className="tracker-title-row"><h2>Detailed topic-wise syllabus</h2><span>{EXAM_TOPIC_IDS[exam.id]?.length || 0} topics</span></div>
 
     <div className="tracker-stages">
@@ -752,7 +745,9 @@ function ExamScreen({examId,completed,progress,openCategory,setOpenCategory,togg
                       const topic=TOPICS.find(t=>t.id===id)!;
                       const done=completed.has(id);
                       return <button className={done?"tracker-topic done":"tracker-topic"} key={id} onClick={()=>toggleTopic(id)}>
-                        <span className="tracker-check">{done?<Check size={13}/>:null}</span>
+                        <span className={done ? "tracker-check circle-choice selected-check" : "tracker-check circle-choice"} aria-hidden="true">
+                          {done ? <CircleCheck size={19} strokeWidth={2.2}/> : <Circle size={19} strokeWidth={1.7}/>}
+                        </span>
                         <span>{topic.name}</span>
                       </button>;
                     })}
@@ -873,21 +868,50 @@ function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorO
     {selectorOpen && <div className="selector-backdrop" onMouseDown={()=>setSelectorOpen(false)}><div className="selector-modal" role="dialog" aria-modal="true" aria-label="Select exams" onMouseDown={e=>e.stopPropagation()}>
       <div className="selector-modal-head"><div><b>Select exams</b><span>{selectedExams.length} of {EXAMS.length} selected</span></div><button className="modal-close" onClick={()=>setSelectorOpen(false)} aria-label="Close"><X size={18}/></button></div>
       <div className="selector-search"><Search size={15}/><input autoFocus value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search exams..." aria-label="Search exams"/>{search && <button aria-label="Clear search" onClick={()=>setSearch("")}><X size={14}/></button>}</div>
-      <div className="selector-options">{filteredExams.map(exam=>{const checked=selectedExams.includes(exam.id);return <button className="selector-option" key={exam.id} onClick={()=>toggleHomeExam(exam.id)}><span className={checked?"check selected-check":"check"}>{checked?<Check size={14}/>:null}</span><span className="selector-exam-icon"><ExamIcon examId={exam.id}/></span><span>{exam.name}</span></button>;})}{!filteredExams.length && <div className="selector-empty">No exams found.</div>}</div>
+      <div className="selector-options">{filteredExams.map(exam=>{const checked=selectedExams.includes(exam.id);return <button className="selector-option" key={exam.id} onClick={()=>toggleHomeExam(exam.id)}><span className={checked?"check selected-check circle-choice":"check circle-choice"} aria-hidden="true">{checked?<CircleCheck size={19} strokeWidth={2.2}/>:<Circle size={19} strokeWidth={1.7}/>}</span><span className="selector-exam-icon"><ExamIcon examId={exam.id}/></span><span>{exam.name}</span></button>;})}{!filteredExams.length && <div className="selector-empty">No exams found.</div>}</div>
       <button className="selector-done" onClick={()=>setSelectorOpen(false)}>Done</button>
     </div></div>}
   </section>
 }
 
-function MoreScreen({exportData,reset,importData}:{exportData:()=>void,reset:()=>void,importData:(file:File)=>void}) {
+function MoreScreen({exportData,reset,importData,onSupport}:{exportData:()=>void,reset:()=>void,importData:(file:File)=>void,onSupport:()=>void}) {
   return <section className="page fade-in">
     <div className="settings-list">
       <button className="setting-row" onClick={exportData}><span className="setting-icon"><Download size={18}/></span><span><b>Export progress</b><small>Save a backup as a JSON file</small></span></button>
       <label className="setting-row"><span className="setting-icon"><Upload size={18}/></span><span><b>Import progress</b><small>Restore a previous JSON backup</small></span><input hidden type="file" accept="application/json" onChange={e=>e.target.files?.[0] && importData(e.target.files[0])}/></label>
       <button className="setting-row danger" onClick={reset}><span className="setting-icon"><RotateCcw size={18}/></span><span><b>Reset progress</b><small>Clear all completed topics and activity</small></span></button>
-      <button className="setting-row donate"><span className="setting-icon">♥</span><span><b>Support SyllabDojo</b><small>Donate to help keep the project free</small></span></button>
+      <button className="setting-row donate" onClick={onSupport}><span className="setting-icon"><Heart size={18}/></span><span><b>Support SyllabDojo</b><small>Keep it free and help build the mobile app</small></span><ChevronDown size={15}/></button>
     </div>
     <p className="more-note">SyllabDojo is free. No account. No subscription. No tracking.</p>
+  </section>
+}
+
+function SupportScreen({onBack}:{onBack:()=>void}) {
+  return <section className="page fade-in support-page">
+    <button className="back" onClick={onBack}><ArrowLeft size={15}/> More</button>
+    <div className="support-hero">
+      <h1>Help keep SyllabDojo free.</h1>
+      <p className="sub">SyllabDojo is built to help aspirants track their preparation without subscriptions, accounts, or paywalls. If it helps you, consider supporting its future.</p>
+    </div>
+    <div className="support-options">
+      <article className="support-card">
+        <span className="support-card-kicker">ONGOING PROJECT</span>
+        <h2>Keep SyllabDojo running</h2>
+        <p>Contribute toward hosting, maintenance, improvements, and keeping the web tracker free for everyone.</p>
+        <span className="support-card-foot"><Heart size={15}/> Support the free web version</span>
+      </article>
+      <article className="support-card support-mobile-card">
+        <span className="support-card-kicker">IN DEVELOPMENT</span>
+        <h2>Help fund the mobile app</h2>
+        <p>Support the work needed to bring SyllabDojo to Android and iOS, with a dedicated mobile experience.</p>
+        <span className="support-card-foot"><Smartphone size={15}/> Contribute to mobile development</span>
+      </article>
+    </div>
+    <div className="support-note">
+      <b>Every contribution helps.</b>
+      <p>Donation links and payment details will be added here when the support channel is ready. Until then, SyllabDojo remains free to use.</p>
+    </div>
+    <p className="more-note">Thank you for supporting an independent, student-focused project.</p>
   </section>
 }
 
