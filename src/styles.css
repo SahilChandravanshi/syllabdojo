@@ -1274,3 +1274,198 @@ h1 span{color:var(--text)}
   from { transform: translateY(24px); opacity: .7; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+/* v81 — Match reset overlays and panels to the exam selector's actual glass theme. */
+.reset-backdrop,
+.reset-confirm-backdrop {
+  background: rgba(20,20,18,.14) !important;
+  backdrop-filter: blur(16px) saturate(100%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(100%) !important;
+}
+.app.dark .reset-backdrop,
+.app.dark .reset-confirm-backdrop {
+  background: rgba(0,0,0,.30) !important;
+}
+.app.light .reset-backdrop,
+.app.light .reset-confirm-backdrop {
+  background: rgba(20,20,18,.14) !important;
+}
+.reset-dialog,
+.reset-confirm-dialog {
+  background: rgba(255,255,255,.46) !important;
+  border-color: rgba(255,255,255,.68) !important;
+  box-shadow: 0 -18px 70px rgba(20,20,18,.15),
+              inset 0 1px 0 rgba(255,255,255,.72) !important;
+  backdrop-filter: blur(28px) saturate(115%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(115%) !important;
+}
+.app.dark .reset-dialog,
+.app.dark .reset-confirm-dialog {
+  background: rgba(31,31,31,.48) !important;
+  border-color: rgba(255,255,255,.13) !important;
+  box-shadow: 0 -20px 80px rgba(0,0,0,.52),
+              inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+
+
+/* v82 — Use the same frosted overlay treatment for every exam information card. */
+.exam-info-backdrop {
+  background: rgba(20,20,18,.14) !important;
+  backdrop-filter: blur(16px) saturate(100%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(100%) !important;
+}
+.app.dark .exam-info-backdrop {
+  background: rgba(0,0,0,.30) !important;
+}
+.app.light .exam-info-backdrop {
+  background: rgba(20,20,18,.14) !important;
+}
+.exam-info-modal {
+  background: rgba(255,255,255,.46) !important;
+  border-color: rgba(255,255,255,.68) !important;
+  box-shadow: 0 22px 70px rgba(20,20,18,.15),
+              inset 0 1px 0 rgba(255,255,255,.72) !important;
+  backdrop-filter: blur(28px) saturate(115%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(115%) !important;
+}
+.app.dark .exam-info-modal {
+  background: rgba(31,31,31,.48) !important;
+  border-color: rgba(255,255,255,.13) !important;
+  box-shadow: 0 22px 70px rgba(0,0,0,.52),
+              inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+
+
+/* v83 — Remove bright nested surfaces inside frosted reset and exam-info overlays. */
+.reset-dialog .reset-all-option,
+.reset-dialog .reset-exam-option,
+.reset-dialog .reset-dialog-actions {
+  background: transparent !important;
+}
+.reset-dialog .reset-all-option,
+.reset-dialog .reset-exam-option {
+  border-color: var(--line) !important;
+  box-shadow: none !important;
+}
+.reset-dialog .reset-exam-option[aria-checked="true"],
+.reset-dialog .reset-exam-option.selected,
+.reset-dialog .reset-exam-option.active,
+.reset-dialog .reset-all-option[aria-checked="true"],
+.reset-dialog .reset-all-option.selected,
+.reset-dialog .reset-all-option.active {
+  outline: none !important;
+  border-color: var(--line) !important;
+  box-shadow: none !important;
+}
+.reset-dialog .reset-exam-option:focus,
+.reset-dialog .reset-exam-option:focus-visible,
+.reset-dialog .reset-all-option:focus,
+.reset-dialog .reset-all-option:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.reset-dialog .reset-dialog-actions {
+  border-top: 1px solid var(--line) !important;
+}
+.exam-info-modal .exam-info-stage,
+.exam-info-modal .stage-card,
+.exam-info-modal .info-stage-card,
+.exam-info-modal .exam-stage-card {
+  background: transparent !important;
+  border-color: var(--line) !important;
+  box-shadow: none !important;
+}
+.exam-info-modal .exam-info-stage *,
+.exam-info-modal .stage-card *,
+.exam-info-modal .info-stage-card *,
+.exam-info-modal .exam-stage-card * {
+  box-shadow: none !important;
+}
+
+
+/* v84 — Transparent exam info surfaces and unboxed dashboard info icon. */
+/* Keep the information dialog itself frosted/translucent instead of a solid white card. */
+.exam-info-backdrop {
+  background: rgba(20,20,18,.14) !important;
+  backdrop-filter: blur(16px) saturate(100%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(100%) !important;
+}
+.app.dark .exam-info-backdrop {
+  background: rgba(0,0,0,.30) !important;
+}
+.app.light .exam-info-backdrop {
+  background: rgba(20,20,18,.14) !important;
+}
+.exam-info-modal {
+  background: rgba(255,255,255,.46) !important;
+  border-color: rgba(255,255,255,.68) !important;
+  box-shadow: 0 22px 70px rgba(20,20,18,.15),
+              inset 0 1px 0 rgba(255,255,255,.72) !important;
+  backdrop-filter: blur(28px) saturate(115%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(115%) !important;
+}
+.app.dark .exam-info-modal {
+  background: rgba(31,31,31,.48) !important;
+  border-color: rgba(255,255,255,.13) !important;
+  box-shadow: 0 22px 70px rgba(0,0,0,.52),
+              inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+/* The dashboard's small info control should be an unboxed icon in either theme. */
+.exam-info-button,
+.exam-info-button:hover,
+.exam-info-button:focus,
+.exam-info-button:focus-visible,
+.app.dark .exam-info-button,
+.app.light .exam-info-button {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+.exam-info-button {
+  color: var(--muted) !important;
+}
+.exam-info-button:hover,
+.exam-info-button:focus-visible {
+  color: var(--text) !important;
+  outline: none !important;
+}
+
+
+/* v85 — Remove the info-dialog's own filled surface; let the blurred page show through. */
+.exam-info-modal,
+.app.light .exam-info-modal,
+.app.dark .exam-info-modal {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.exam-info-modal {
+  border-color: transparent !important;
+}
+
+
+/* v86 — Exam-selection modal's per-exam info controls: remove the filled circle. */
+.selector-option-info,
+.selector-option-info:hover,
+.selector-option-info:active,
+.selector-option-info:focus,
+.selector-option-info:focus-visible,
+.app.light .selector-option-info,
+.app.dark .selector-option-info {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+.selector-option-info {
+  color: var(--muted) !important;
+}
+.selector-option-info:hover,
+.selector-option-info:focus-visible {
+  color: var(--text) !important;
+}
+.selector-option-info:focus-visible {
+  outline: none !important;
+}

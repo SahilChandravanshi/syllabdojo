@@ -413,7 +413,7 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
     </div>}
 
     {selectorOpen && <div className="selector-backdrop" onMouseDown={closeSelector}>
-      <div className="selector-modal" role="dialog" aria-modal="true" aria-label="Select exams" onMouseDown={e=>e.stopPropagation()}>
+      {!infoExam && <div className="selector-modal" role="dialog" aria-modal="true" aria-label="Select exams" onMouseDown={e=>e.stopPropagation()}>
         <div className="selector-modal-head">
           <div><b>Select exams</b><span>{selectedExams.length} of {EXAMS.length} selected</span></div>
           <button className="modal-close" onClick={closeSelector} aria-label="Close"><X size={18}/></button>
@@ -442,7 +442,7 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
           {!filteredExams.length && <div className="selector-empty">No exams found.</div>}
         </div>
         <button className="selector-done" onClick={closeSelector}>Done</button>
-      </div>
+      </div>}
     </div>}
   </section>
 }
@@ -764,6 +764,8 @@ function ExamScreen({examId,completed,progress,openCategory,setOpenCategory,togg
 
 function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorOpen,search,setSearch,completed,onOpenExam}:{store:Store,selectedExams:string[],toggleHomeExam:(id:string)=>void,selectorOpen:boolean,setSelectorOpen:(open:boolean)=>void,search:string,setSearch:(value:string)=>void,completed:Set<string>,onOpenExam:(id:string)=>void}) {
   const [period, setPeriod] = useState<"12months"|"month"|"week">("12months");
+  const [infoExamId, setInfoExamId] = useState<string|null>(null);
+  const infoExam = EXAMS.find(exam=>exam.id===infoExamId);
   const [activePill, setActivePill] = useState<{examId:string,date:string}|null>(null);
   const [pinnedPill, setPinnedPill] = useState<{examId:string,date:string}|null>(null);
   const [detailPosition, setDetailPosition] = useState<{left:number,top:number}|null>(null);
@@ -865,12 +867,28 @@ function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorO
     })}
     </div>
     {!visibleExams.length && <div className="empty-state">Select at least one exam to view its activity heatmap.</div>}
-    {selectorOpen && <div className="selector-backdrop" onMouseDown={()=>setSelectorOpen(false)}><div className="selector-modal" role="dialog" aria-modal="true" aria-label="Select exams" onMouseDown={e=>e.stopPropagation()}>
-      <div className="selector-modal-head"><div><b>Select exams</b><span>{selectedExams.length} of {EXAMS.length} selected</span></div><button className="modal-close" onClick={()=>setSelectorOpen(false)} aria-label="Close"><X size={18}/></button></div>
-      <div className="selector-search"><Search size={15}/><input autoFocus value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search exams..." aria-label="Search exams"/>{search && <button aria-label="Clear search" onClick={()=>setSearch("")}><X size={14}/></button>}</div>
-      <div className="selector-options">{filteredExams.map(exam=>{const checked=selectedExams.includes(exam.id);return <button className="selector-option" key={exam.id} onClick={()=>toggleHomeExam(exam.id)}><span className={checked?"check selected-check circle-choice":"check circle-choice"} aria-hidden="true">{checked?<CircleCheck size={19} strokeWidth={2.2}/>:<Circle size={19} strokeWidth={1.7}/>}</span><span className="selector-exam-icon"><ExamIcon examId={exam.id}/></span><span>{exam.name}</span></button>;})}{!filteredExams.length && <div className="selector-empty">No exams found.</div>}</div>
-      <button className="selector-done" onClick={()=>setSelectorOpen(false)}>Done</button>
-    </div></div>}
+    {selectorOpen && <div className="selector-backdrop" onMouseDown={() => setSelectorOpen(false)}>{!infoExam && <div className="selector-modal" role="dialog" aria-modal="true" aria-label="Select exams" onMouseDown={e => e.stopPropagation()}>
+      <div className="selector-modal-head"><div><b>Select exams</b><span>{selectedExams.length} of {EXAMS.length} selected</span></div><button className="modal-close" onClick={() => setSelectorOpen(false)} aria-label="Close"><X size={18} /></button></div>
+      <div className="selector-search"><Search size={15} /><input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Search exams..." aria-label="Search exams" />{search && <button aria-label="Clear search" onClick={() => setSearch("")}><X size={14} /></button>}</div>
+      <div className="selector-options">{filteredExams.map(exam => {
+        const checked = selectedExams.includes(exam.id); return <div className="selector-option" key={exam.id}>
+          <button className="selector-option-main" onClick={() => toggleHomeExam(exam.id)} aria-pressed={checked}>
+            <span className={checked ? "check selected-check circle-choice" : "check circle-choice"} aria-hidden="true">{checked ? <CircleCheck size={19} strokeWidth={2.2} /> : <Circle size={19} strokeWidth={1.7} />}</span>
+            <span className="selector-exam-icon"><ExamIcon examId={exam.id} /></span>
+            <span className="selector-option-name">{exam.name}</span>
+          </button>
+          <button className="selector-option-info" onClick={() => setInfoExamId(exam.id)} aria-label={`About ${exam.name}`} title={`About ${exam.name}`}><Info size={15} /></button>
+        </div>;
+      })}{!filteredExams.length && <div className="selector-empty">No exams found.</div>}</div>
+      {!infoExam && <button className="selector-done" onClick={() => setSelectorOpen(false)}>Done</button>}
+    </div>}</div>}
+    {infoExam && <div className="exam-info-backdrop" onMouseDown={()=>setInfoExamId(null)}>
+      <section className="exam-info-modal" role="dialog" aria-modal="true" aria-label={`${infoExam.name} information`} onMouseDown={e=>e.stopPropagation()}>
+        <header className="exam-info-head"><div><span className={`exam-info-logo exam-${infoExam.id}`}><ExamIcon examId={infoExam.id}/></span><div><h2>{infoExam.name}</h2><p>{infoExam.description}</p></div></div><button className="modal-close" onClick={()=>setInfoExamId(null)} aria-label="Close information"><X size={18}/></button></header>
+        <h3>Stages and subjects</h3>
+        <div className="exam-info-stages">{Array.from(new Map(infoExam.categories.map(category=>[category.stage,infoExam.categories.filter(item=>item.stage===category.stage)])).entries()).map(([stage,categories])=><div className="exam-info-stage" key={stage}><b>{stage}</b><p>{[...new Set(categories.map(category=>category.name))].join(" · ")}</p></div>)}</div>
+      </section>
+    </div>}
   </section>
 }
 
