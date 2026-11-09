@@ -15,8 +15,8 @@
 	--accent-strong: #24a66c;
 	--accent-soft: #e1f5ec;
 	--accent-ink: #197c52;
-	--line: rgba(20, 20, 18, 0.075);
-	--line-strong: rgba(20, 20, 18, 0.12);
+	--line: rgba(20, 20, 18, 0.095);
+	--line-strong: rgba(20, 20, 18, 0.14);
 	--track: #e8e8e6;
 	--ring-empty: #e5e5e3;
 	--topic: #2c2c2b;
@@ -87,8 +87,8 @@ input {
 	--accent-strong: #35b97e;
 	--accent-soft: #18372a;
 	--accent-ink: #74ddb0;
-	--line: rgba(255, 255, 255, 0.075);
-	--line-strong: rgba(255, 255, 255, 0.13);
+	--line: rgba(255, 255, 255, 0.055);
+	--line-strong: rgba(255, 255, 255, 0.085);
 	--track: #363636;
 	--ring-empty: #383838;
 	--topic: #e3e3df;
@@ -4890,4 +4890,136 @@ h1 span {
 }
 .selector-option-info:focus-visible {
 	outline: none !important;
+}
+
+
+/* v90 — Sleek, minimal visual refresh based on the user's updated v89. */
+.app:not(.dark) {
+	--bg: #f5f5f3;
+	--panel: #ffffff;
+	--panel-soft: #f8f8f7;
+	--panel-muted: #efefed;
+	--text: #171717;
+	--text-2: #42423f;
+	--muted: #777773;
+	--muted-2: #999994;
+	--line: rgba(22, 22, 20, 0.055);
+	--line-strong: rgba(22, 22, 20, 0.09);
+	--track: #e5e5e2;
+	--ring-empty: #dededb;
+	--shadow: rgba(20, 20, 18, 0.025);
+	--shadow-2: rgba(20, 20, 18, 0.045);
+	--shadow-3: rgba(20, 20, 18, 0.09);
+}
+.app.dark {
+	--bg: #151515;
+	--panel: #1c1c1c;
+	--panel-soft: #202020;
+	--panel-muted: #292929;
+	--line: rgba(255, 255, 255, 0.065);
+	--line-strong: rgba(255, 255, 255, 0.095);
+	--shadow: rgba(0, 0, 0, 0.08);
+	--shadow-2: rgba(0, 0, 0, 0.12);
+	--shadow-3: rgba(0, 0, 0, 0.2);
+}
+
+/* Flatten the card system: borders define surfaces, shadows barely lift them. */
+.theme-btn,
+.dashboard-stat,
+.dashboard-selector-card,
+.home-exam-section,
+.analytics-stats > div,
+.analytics-row,
+.heat-card,
+.setting-row,
+.tracker-logo-frame,
+.tracker-stage,
+.back,
+.bottom-nav,
+.nav-item.selected,
+.selector-modal,
+.toast {
+	box-shadow: 0 2px 8px var(--shadow) !important;
+}
+.theme-btn:hover,
+.home-exam-section:hover {
+	transform: none !important;
+	box-shadow: 0 3px 10px var(--shadow-2) !important;
+}
+.home-exam-section,
+.dashboard-stat,
+.dashboard-selector-card,
+.analytics-stats > div,
+.analytics-row,
+.heat-card,
+.setting-row,
+.tracker-stage {
+	border-color: var(--line) !important;
+}
+.home-exam-section,
+.dashboard-selector-card,
+.dashboard-stat,
+.heat-card,
+.tracker-stage {
+	border-radius: 23px;
+}
+
+/* Reference-inspired typography: clearer hierarchy and stronger contrast. */
+body {
+	font-size: 14px;
+}
+h1 {
+	color: var(--text);
+}
+.eyebrow {
+	font-size: 10px;
+	color: var(--muted);
+	letter-spacing: 1.45px;
+}
+.sub {
+	color: var(--muted);
+	font-size: 13px;
+}
+.dashboard-stat strong,
+.dashboard-stat b {
+	color: var(--text);
+}
+.dashboard-stat small,
+.dashboard-selector-card small,
+.home-exam-section .muted,
+.analytics-row small,
+.setting-row small {
+	color: var(--muted);
+}
+.home-exam-title,
+.home-exam-section h2,
+.exam-title,
+.selector-modal-head h2 {
+	color: var(--text);
+}
+.progress-label,
+.total-progress-label {
+	color: var(--text-2);
+}
+.bottom-nav {
+	border-color: var(--line) !important;
+	background: color-mix(in srgb, var(--panel) 97%, transparent) !important;
+}
+.nav-item.selected {
+	box-shadow: none !important;
+	background: var(--panel-muted) !important;
+}
+
+
+/* v92 — Match card surfaces to the page background; use only a faint outline
+   to separate cards, consistently in light and dark themes. */
+.app:not(.dark) {
+  --panel: var(--bg);
+  --panel-soft: var(--bg);
+  --panel-muted: var(--bg);
+}
+.app.dark {
+  --panel: var(--bg);
+  --panel-soft: var(--bg);
+  --panel-muted: var(--bg);
 }
