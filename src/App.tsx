@@ -442,14 +442,18 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
           {filteredExams.map(exam=>{
             const checked=selectedExams.includes(exam.id);
             return <div className={`selector-option ${checked ? "selector-option-selected" : ""}`} key={exam.id}
+              data-exam-id={exam.id}
               draggable={checked}
+              onTouchMove={e=>{ const dragId=pointerDragExam.current; if(!dragId || !checked) return; e.preventDefault(); const touch=e.touches[0]; const target=document.elementFromPoint(touch.clientX,touch.clientY)?.closest<HTMLElement>(".selector-option")?.dataset.examId; if(target && target!==dragId) reorderSelectedExam(dragId,target); }}
+              onTouchEnd={()=>{pointerDragExam.current=null;}}
+              onTouchCancel={()=>{pointerDragExam.current=null;}}
               onPointerEnter={()=>{ const dragId=pointerDragExam.current; if (dragId && checked && dragId!==exam.id) reorderSelectedExam(dragId, exam.id); }}
               onPointerUp={()=>{ pointerDragExam.current=null; }}
               onPointerCancel={()=>{ pointerDragExam.current=null; }}
               onDragStart={e=>{ if (checked) { e.dataTransfer.setData("text/plain", exam.id); e.dataTransfer.effectAllowed="move"; } }}
               onDragOver={e=>{ const dragId=e.dataTransfer.getData("text/plain"); if (checked && dragId && dragId!==exam.id) { e.preventDefault(); reorderSelectedExam(dragId, exam.id); } }}
               onDrop={e=>{ e.preventDefault(); const dragId=e.dataTransfer.getData("text/plain"); if (dragId) reorderSelectedExam(dragId, exam.id); }}>
-              {checked && <span className="exam-drag-handle" onPointerDown={e=>{ e.preventDefault(); pointerDragExam.current=exam.id; }} aria-label="Drag to reorder"><GripVertical size={16}/></span>}
+              {checked && <span className="exam-drag-handle" onPointerDown={e=>{ if(e.pointerType!=="touch"){e.preventDefault(); pointerDragExam.current=exam.id;} }} onTouchStart={e=>{e.stopPropagation();pointerDragExam.current=exam.id;}} aria-label="Drag to reorder"><GripVertical size={16}/></span>}
               <button className="selector-option-main" onClick={()=>toggleHomeExam(exam.id)} aria-pressed={checked}>
                 <span className={checked ? "check selected-check circle-choice" : "check circle-choice"} aria-hidden="true">
                   {checked ? <CircleCheck size={19} strokeWidth={2.2}/> : <Circle size={19} strokeWidth={1.7}/>}
@@ -897,14 +901,18 @@ function Analytics({store,selectedExams,toggleHomeExam,reorderSelectedExam,selec
       <div className="selector-search"><Search size={15} /><input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Search exams..." aria-label="Search exams" />{search && <button aria-label="Clear search" onClick={() => setSearch("")}><X size={14} /></button>}</div>
       <div className="selector-options">{filteredExams.map(exam => {
         const checked = selectedExams.includes(exam.id); return <div className={`selector-option ${checked ? "selector-option-selected" : ""}`} key={exam.id}
+              data-exam-id={exam.id}
               draggable={checked}
+              onTouchMove={e=>{ const dragId=pointerDragExam.current; if(!dragId || !checked) return; e.preventDefault(); const touch=e.touches[0]; const target=document.elementFromPoint(touch.clientX,touch.clientY)?.closest<HTMLElement>(".selector-option")?.dataset.examId; if(target && target!==dragId) reorderSelectedExam(dragId,target); }}
+              onTouchEnd={()=>{pointerDragExam.current=null;}}
+              onTouchCancel={()=>{pointerDragExam.current=null;}}
               onPointerEnter={()=>{ const dragId=pointerDragExam.current; if (dragId && checked && dragId!==exam.id) reorderSelectedExam(dragId, exam.id); }}
               onPointerUp={()=>{ pointerDragExam.current=null; }}
               onPointerCancel={()=>{ pointerDragExam.current=null; }}
               onDragStart={e=>{ if (checked) { e.dataTransfer.setData("text/plain", exam.id); e.dataTransfer.effectAllowed="move"; } }}
               onDragOver={e=>{ const dragId=e.dataTransfer.getData("text/plain"); if (checked && dragId && dragId!==exam.id) { e.preventDefault(); reorderSelectedExam(dragId, exam.id); } }}
               onDrop={e=>{ e.preventDefault(); const dragId=e.dataTransfer.getData("text/plain"); if (dragId) reorderSelectedExam(dragId, exam.id); }}>
-          {checked && <span className="exam-drag-handle" onPointerDown={e=>{ e.preventDefault(); pointerDragExam.current=exam.id; }} aria-label="Drag to reorder"><GripVertical size={16}/></span>}
+          {checked && <span className="exam-drag-handle" onPointerDown={e=>{ if(e.pointerType!=="touch"){e.preventDefault(); pointerDragExam.current=exam.id;} }} onTouchStart={e=>{e.stopPropagation();pointerDragExam.current=exam.id;}} aria-label="Drag to reorder"><GripVertical size={16}/></span>}
           <button className="selector-option-main" onClick={() => toggleHomeExam(exam.id)} aria-pressed={checked}>
             <span className={checked ? "check selected-check circle-choice" : "check circle-choice"} aria-hidden="true">{checked ? <CircleCheck size={19} strokeWidth={2.2} /> : <Circle size={19} strokeWidth={1.7} />}</span>
             <span className="selector-exam-icon"><ExamIcon examId={exam.id} /></span>
