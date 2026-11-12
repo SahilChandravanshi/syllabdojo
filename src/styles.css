@@ -5023,3 +5023,34 @@ h1 {
   --panel-soft: var(--bg);
   --panel-muted: var(--bg);
 }
+
+
+/* v95 — selected exam rows support pointer/touch reordering as well as native drag */
+.selector-option-selected {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.selector-option-selected:active {
+  cursor: grabbing;
+}
+
+
+/* v96 — visible drag affordance and reliable touch-friendly exam reordering */
+.selector-option {
+  position: relative;
+}
+.exam-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  min-width: 24px;
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.exam-drag-handle:active { cursor: grabbing; }
+.selector-option-selected { cursor: default; }

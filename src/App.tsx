@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { BarChart3, Check, ChevronDown, Download, Home, Info, MoreHorizontal, Moon, RotateCcw, Search, Sun, Upload, X, Circle, CircleCheck, Heart, ArrowLeft, Smartphone } from "lucide-react";
-import { EXAMS, EXAM_TOPIC_IDS, TOPICS, DATA_VERSION } from "./data";
+import { useEffect, useMemo, useState, useRef, type CSSProperties } from "react";
+import { BarChart3, Check, ChevronDown, Download, Home, Info, MoreHorizontal, Moon, RotateCcw, Search, Sun, Upload, X, Circle, CircleCheck, Heart, ArrowLeft, Smartphone, GripVertical } from "lucide-react";
+import { EXAMS, EXAM_TOPIC_IDS, TOPICS, DATA_VERSION, type Exam } from "./data";
 
 type Store = {
   completed: string[];
@@ -122,6 +122,19 @@ function App() {
     setSelectedExams(prev => {
       const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
       if (!next.length) return prev;
+      localStorage.setItem(SELECTED_EXAMS_KEY, JSON.stringify(next));
+      return next;
+    });
+  }
+
+  function reorderSelectedExam(dragId: string, targetId: string) {
+    setSelectedExams(prev => {
+      if (dragId === targetId || !prev.includes(dragId) || !prev.includes(targetId)) return prev;
+      const next = [...prev];
+      const from = next.indexOf(dragId);
+      const to = next.indexOf(targetId);
+      next.splice(from, 1);
+      next.splice(to, 0, dragId);
       localStorage.setItem(SELECTED_EXAMS_KEY, JSON.stringify(next));
       return next;
     });
@@ -260,9 +273,9 @@ function App() {
       </header>
 
       <main>
-        {screen==="home" && <HomeScreen completed={completed} globalProgress={globalProgress} examProgress={examProgress} onOpen={(id, category)=>navigate("exam", id, category || null)} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} />}
+        {screen==="home" && <HomeScreen completed={completed} globalProgress={globalProgress} examProgress={examProgress} onOpen={(id, category)=>navigate("exam", id, category || null)} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} reorderSelectedExam={reorderSelectedExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} />}
         {screen==="exam" && <ExamScreen examId={selectedExam} completed={completed} progress={examProgress(selectedExam)} openCategory={openCategory} setOpenCategory={setOpenCategory} toggleTopic={(id)=>toggleTopic(id, selectedExam)} back={()=>navigate("home", selectedExam, null)} />}
-        {screen==="analytics" && <Analytics store={store} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} completed={completed} onOpenExam={(id)=>navigate("exam",id,null)} />}
+        {screen==="analytics" && <Analytics store={store} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} reorderSelectedExam={reorderSelectedExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} completed={completed} onOpenExam={(id)=>navigate("exam",id,null)} />}
         {screen==="more" && <MoreScreen exportData={exportData} reset={openResetDialog} importData={importData} onSupport={()=>navigate("support", selectedExam, null)} />}{screen==="support" && <SupportScreen onBack={()=>navigate("more", selectedExam, null)} /> }
       </main>
 
@@ -334,11 +347,13 @@ function App() {
   );
 }
 
-function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedExams, toggleHomeExam, selectorOpen, setSelectorOpen, search, setSearch}:{completed:Set<string>,globalProgress:number,examProgress:(id:string)=>number,onOpen:(id:string,category?:string)=>void,selectedExams:string[],toggleHomeExam:(id:string)=>void,selectorOpen:boolean,setSelectorOpen:(open:boolean)=>void,search:string,setSearch:(value:string)=>void}) {
-  const visibleExams = EXAMS.filter(exam => selectedExams.includes(exam.id));
+function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedExams, toggleHomeExam, reorderSelectedExam, selectorOpen, setSelectorOpen, search, setSearch}:{completed:Set<string>,globalProgress:number,examProgress:(id:string)=>number,onOpen:(id:string,category?:string)=>void,selectedExams:string[],toggleHomeExam:(id:string)=>void,reorderSelectedExam:(dragId:string,targetId:string)=>void,selectorOpen:boolean,setSelectorOpen:(open:boolean)=>void,search:string,setSearch:(value:string)=>void}) {
+  const pointerDragExam = useRef<string | null>(null);
+  const visibleExams = selectedExams.map(id => EXAMS.find(exam => exam.id === id)).filter((exam): exam is Exam => Boolean(exam));
   const [infoExamId, setInfoExamId] = useState<string | null>(null);
   const infoExam = EXAMS.find(exam => exam.id === infoExamId) ?? null;
-  const filteredExams = EXAMS.filter(exam => exam.name.toLowerCase().includes(search.trim().toLowerCase()));
+  const orderedExams = [...selectedExams.map(id => EXAMS.find(exam => exam.id === id)).filter((exam): exam is Exam => Boolean(exam)), ...EXAMS.filter(exam => !selectedExams.includes(exam.id))];
+  const filteredExams = orderedExams.filter(exam => exam.name.toLowerCase().includes(search.trim().toLowerCase()));
 
   function openSelector() {
     setSearch("");
@@ -426,7 +441,15 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
         <div className="selector-options">
           {filteredExams.map(exam=>{
             const checked=selectedExams.includes(exam.id);
-            return <div className="selector-option" key={exam.id}>
+            return <div className={`selector-option ${checked ? "selector-option-selected" : ""}`} key={exam.id}
+              draggable={checked}
+              onPointerEnter={()=>{ const dragId=pointerDragExam.current; if (dragId && checked && dragId!==exam.id) reorderSelectedExam(dragId, exam.id); }}
+              onPointerUp={()=>{ pointerDragExam.current=null; }}
+              onPointerCancel={()=>{ pointerDragExam.current=null; }}
+              onDragStart={e=>{ if (checked) { e.dataTransfer.setData("text/plain", exam.id); e.dataTransfer.effectAllowed="move"; } }}
+              onDragOver={e=>{ const dragId=e.dataTransfer.getData("text/plain"); if (checked && dragId && dragId!==exam.id) { e.preventDefault(); reorderSelectedExam(dragId, exam.id); } }}
+              onDrop={e=>{ e.preventDefault(); const dragId=e.dataTransfer.getData("text/plain"); if (dragId) reorderSelectedExam(dragId, exam.id); }}>
+              {checked && <span className="exam-drag-handle" onPointerDown={e=>{ e.preventDefault(); pointerDragExam.current=exam.id; }} aria-label="Drag to reorder"><GripVertical size={16}/></span>}
               <button className="selector-option-main" onClick={()=>toggleHomeExam(exam.id)} aria-pressed={checked}>
                 <span className={checked ? "check selected-check circle-choice" : "check circle-choice"} aria-hidden="true">
                   {checked ? <CircleCheck size={19} strokeWidth={2.2}/> : <Circle size={19} strokeWidth={1.7}/>}
@@ -762,7 +785,8 @@ function ExamScreen({examId,completed,progress,openCategory,setOpenCategory,togg
   </section>
 }
 
-function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorOpen,search,setSearch,completed,onOpenExam}:{store:Store,selectedExams:string[],toggleHomeExam:(id:string)=>void,selectorOpen:boolean,setSelectorOpen:(open:boolean)=>void,search:string,setSearch:(value:string)=>void,completed:Set<string>,onOpenExam:(id:string)=>void}) {
+function Analytics({store,selectedExams,toggleHomeExam,reorderSelectedExam,selectorOpen,setSelectorOpen,search,setSearch,completed,onOpenExam}:{store:Store,selectedExams:string[],toggleHomeExam:(id:string)=>void,reorderSelectedExam:(dragId:string,targetId:string)=>void,selectorOpen:boolean,setSelectorOpen:(open:boolean)=>void,search:string,setSearch:(value:string)=>void,completed:Set<string>,onOpenExam:(id:string)=>void}) {
+  const pointerDragExam = useRef<string | null>(null);
   const [period, setPeriod] = useState<"12months"|"month"|"week">("12months");
   const [infoExamId, setInfoExamId] = useState<string|null>(null);
   const infoExam = EXAMS.find(exam=>exam.id===infoExamId);
@@ -800,9 +824,10 @@ function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorO
     document.addEventListener("pointerdown", closeOnOutside);
     return () => document.removeEventListener("pointerdown", closeOnOutside);
   }, [activePill]);
-  const visibleExams = EXAMS.filter(exam => selectedExams.includes(exam.id));
+  const visibleExams = selectedExams.map(id => EXAMS.find(exam => exam.id === id)).filter((exam): exam is Exam => Boolean(exam));
   const openSelector = () => { setSearch(""); setSelectorOpen(true); };
-  const filteredExams = EXAMS.filter(exam => exam.name.toLowerCase().includes(search.trim().toLowerCase()));
+  const orderedExams = [...selectedExams.map(id => EXAMS.find(exam => exam.id === id)).filter((exam): exam is Exam => Boolean(exam)), ...EXAMS.filter(exam => !selectedExams.includes(exam.id))];
+  const filteredExams = orderedExams.filter(exam => exam.name.toLowerCase().includes(search.trim().toLowerCase()));
   const now = new Date(); now.setHours(12,0,0,0);
   let rangeStart = new Date(now), rangeEnd = new Date(now);
   if (period === "12months") { rangeStart = new Date(now.getFullYear(), now.getMonth()-11, 1, 12); }
@@ -854,7 +879,7 @@ function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorO
     <div className={`analytics-heatmaps-grid period-${period}`}>
     {visibleExams.map(exam=>{
       const examActivity = store.activityByExam?.[exam.id] || store.activity;
-      const selected = activePill?.examId===exam.id ? activePill.date : null;
+      const selected = activePill && activePill.examId===exam.id ? activePill.date : null;
       const selectedTopics = selected ? topicsFor(exam.id,selected) : [];
       return <section className="exam-heat-section" key={exam.id}>
         <div className="section-head heat-title"><div className="heat-title-name"><h2>{exam.name}</h2><button className="heatmap-syllabus-button" onClick={()=>onOpenExam(exam.id)}>Open syllabus <span aria-hidden="true">↗</span></button></div></div>
@@ -871,7 +896,15 @@ function Analytics({store,selectedExams,toggleHomeExam,selectorOpen,setSelectorO
       <div className="selector-modal-head"><div><b>Select exams</b><span>{selectedExams.length} of {EXAMS.length} selected</span></div><button className="modal-close" onClick={() => setSelectorOpen(false)} aria-label="Close"><X size={18} /></button></div>
       <div className="selector-search"><Search size={15} /><input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Search exams..." aria-label="Search exams" />{search && <button aria-label="Clear search" onClick={() => setSearch("")}><X size={14} /></button>}</div>
       <div className="selector-options">{filteredExams.map(exam => {
-        const checked = selectedExams.includes(exam.id); return <div className="selector-option" key={exam.id}>
+        const checked = selectedExams.includes(exam.id); return <div className={`selector-option ${checked ? "selector-option-selected" : ""}`} key={exam.id}
+              draggable={checked}
+              onPointerEnter={()=>{ const dragId=pointerDragExam.current; if (dragId && checked && dragId!==exam.id) reorderSelectedExam(dragId, exam.id); }}
+              onPointerUp={()=>{ pointerDragExam.current=null; }}
+              onPointerCancel={()=>{ pointerDragExam.current=null; }}
+              onDragStart={e=>{ if (checked) { e.dataTransfer.setData("text/plain", exam.id); e.dataTransfer.effectAllowed="move"; } }}
+              onDragOver={e=>{ const dragId=e.dataTransfer.getData("text/plain"); if (checked && dragId && dragId!==exam.id) { e.preventDefault(); reorderSelectedExam(dragId, exam.id); } }}
+              onDrop={e=>{ e.preventDefault(); const dragId=e.dataTransfer.getData("text/plain"); if (dragId) reorderSelectedExam(dragId, exam.id); }}>
+          {checked && <span className="exam-drag-handle" onPointerDown={e=>{ e.preventDefault(); pointerDragExam.current=exam.id; }} aria-label="Drag to reorder"><GripVertical size={16}/></span>}
           <button className="selector-option-main" onClick={() => toggleHomeExam(exam.id)} aria-pressed={checked}>
             <span className={checked ? "check selected-check circle-choice" : "check circle-choice"} aria-hidden="true">{checked ? <CircleCheck size={19} strokeWidth={2.2} /> : <Circle size={19} strokeWidth={1.7} />}</span>
             <span className="selector-exam-icon"><ExamIcon examId={exam.id} /></span>
