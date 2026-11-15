@@ -2,7 +2,7 @@
 	font-family:
 		-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter",
 		"Segoe UI", sans-serif;
-	font-synthesis: none;
+	font-synthesis: weight;
 	--bg: #ffffff;
 	--panel: #ffffff;
 	--panel-soft: #f7f7f5;
