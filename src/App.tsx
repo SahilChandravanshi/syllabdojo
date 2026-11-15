@@ -435,7 +435,7 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
         </div>
         <div className="selector-search">
           <Search size={15}/>
-          <input autoFocus value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search exams..." aria-label="Search exams"/>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search exams..." aria-label="Search exams"/>
           {search && <button aria-label="Clear search" onClick={()=>setSearch("")}><X size={14}/></button>}
         </div>
         <div className="selector-options">
@@ -898,7 +898,7 @@ function Analytics({store,selectedExams,toggleHomeExam,reorderSelectedExam,selec
     {!visibleExams.length && <div className="empty-state">Select at least one exam to view its activity heatmap.</div>}
     {selectorOpen && <div className="selector-backdrop" onMouseDown={() => setSelectorOpen(false)}>{!infoExam && <div className="selector-modal" role="dialog" aria-modal="true" aria-label="Select exams" onMouseDown={e => e.stopPropagation()}>
       <div className="selector-modal-head"><div><b>Select exams</b><span>{selectedExams.length} of {EXAMS.length} selected</span></div><button className="modal-close" onClick={() => setSelectorOpen(false)} aria-label="Close"><X size={18} /></button></div>
-      <div className="selector-search"><Search size={15} /><input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Search exams..." aria-label="Search exams" />{search && <button aria-label="Clear search" onClick={() => setSearch("")}><X size={14} /></button>}</div>
+      <div className="selector-search"><Search size={15} /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search exams..." aria-label="Search exams" />{search && <button aria-label="Clear search" onClick={() => setSearch("")}><X size={14} /></button>}</div>
       <div className="selector-options">{filteredExams.map(exam => {
         const checked = selectedExams.includes(exam.id); return <div className={`selector-option ${checked ? "selector-option-selected" : ""}`} key={exam.id}
               data-exam-id={exam.id}
