@@ -7,12 +7,13 @@ type Store = {
   activity: Record<string, number>;
   activityByExam?: Record<string, Record<string, number>>;
   activityTopicsByExam?: Record<string, Record<string, string[]>>;
+  topicStudy?: Record<string, { theory: boolean; practice: boolean; revisions: number; lastRevised: string | null }>;
 };
 
 const KEY = "syllabdojo.progress.v1";
 const SELECTED_EXAMS_KEY = "syllabdojo.selected-exams.v1";
 const VIEW_STATE_KEY = "syllabdojo.view.v1";
-const emptyStore: Store = { completed: [], activity: {}, activityByExam: {} };
+const emptyStore: Store = { completed: [], activity: {}, activityByExam: {}, topicStudy: {} };
 
 function loadTheme(): "dark" | "light" {
   return localStorage.getItem("syllabdojo.theme") === "light" ? "light" : "dark";
@@ -43,7 +44,7 @@ function loadViewState() {
 function loadStore(): Store {
   try {
     const parsed = JSON.parse(localStorage.getItem(KEY) || "");
-    return { completed: Array.isArray(parsed.completed) ? parsed.completed : [], activity: parsed.activity || {}, activityByExam: parsed.activityByExam || {}, activityTopicsByExam: parsed.activityTopicsByExam || {} };
+    return { completed: Array.isArray(parsed.completed) ? parsed.completed : [], activity: parsed.activity || {}, activityByExam: parsed.activityByExam || {}, activityTopicsByExam: parsed.activityTopicsByExam || {}, topicStudy: parsed.topicStudy || {} };
   } catch { return emptyStore; }
 }
 
@@ -169,7 +170,10 @@ function App() {
       examTopics[today()] = [...(examTopics[today()] || []), id];
       activityTopicsByExam[examId] = examTopics;
     }
-    persist({ completed: [...next], activity, activityByExam, activityTopicsByExam });
+    const topicStudy = { ...(store.topicStudy || {}) };
+    const currentStudy = topicStudy[id] || { theory: false, practice: false, revisions: 0, lastRevised: null };
+    topicStudy[id] = { ...currentStudy, theory: wasDone ? currentStudy.theory : true };
+    persist({ completed: [...next], activity, activityByExam, activityTopicsByExam, topicStudy });
   }
 
   function openResetDialog() {
@@ -274,7 +278,7 @@ function App() {
 
       <main>
         {screen==="home" && <HomeScreen completed={completed} globalProgress={globalProgress} examProgress={examProgress} onOpen={(id, category)=>navigate("exam", id, category || null)} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} reorderSelectedExam={reorderSelectedExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} />}
-        {screen==="exam" && <ExamScreen examId={selectedExam} completed={completed} progress={examProgress(selectedExam)} openCategory={openCategory} setOpenCategory={setOpenCategory} toggleTopic={(id)=>toggleTopic(id, selectedExam)} back={()=>navigate("home", selectedExam, null)} />}
+        {screen==="exam" && <ExamScreen examId={selectedExam} completed={completed} progress={examProgress(selectedExam)} openCategory={openCategory} setOpenCategory={setOpenCategory} toggleTopic={(id)=>toggleTopic(id, selectedExam)} topicStudy={store.topicStudy || {}} updateTopicStudy={(id, patch)=>{const current=(store.topicStudy||{})[id]||{theory:completed.has(id),practice:false,revisions:0,lastRevised:null};persist({...store,topicStudy:{...(store.topicStudy||{}),[id]:{...current,...patch}}});}} back={()=>navigate("home", selectedExam, null)} />}
         {screen==="analytics" && <Analytics store={store} selectedExams={selectedExams} toggleHomeExam={toggleHomeExam} reorderSelectedExam={reorderSelectedExam} selectorOpen={examSelectorOpen} setSelectorOpen={setExamSelectorOpen} search={examSearch} setSearch={setExamSearch} completed={completed} onOpenExam={(id)=>navigate("exam",id,null)} />}
         {screen==="more" && <MoreScreen exportData={exportData} reset={openResetDialog} importData={importData} onSupport={()=>navigate("support", selectedExam, null)} />}{screen==="support" && <SupportScreen onBack={()=>navigate("more", selectedExam, null)} /> }
       </main>
@@ -705,7 +709,7 @@ function stageLabel(examId:string, stage:string) {
   return labels[`${examId}|${stage}`] || stage;
 }
 
-function ExamScreen({examId,completed,progress,openCategory,setOpenCategory,toggleTopic,back}:{examId:string,completed:Set<string>,progress:number,openCategory:string|null,setOpenCategory:(x:string|null)=>void,toggleTopic:(x:string)=>void,back:()=>void}) {
+function ExamScreen({examId,completed,progress,openCategory,setOpenCategory,toggleTopic,topicStudy,updateTopicStudy,back}:{examId:string,completed:Set<string>,progress:number,openCategory:string|null,setOpenCategory:(x:string|null)=>void,toggleTopic:(x:string)=>void,topicStudy:NonNullable<Store["topicStudy"]>,updateTopicStudy:(id:string,patch:Partial<{theory:boolean;practice:boolean;revisions:number;lastRevised:string|null}>)=>void,back:()=>void}) {
   const exam = EXAMS.find(e=>e.id===examId)!;
   const stages = [...new Set(exam.categories.map(category => category.stage))];
   const [openStages, setOpenStages] = useState<Record<string,boolean>>(() => Object.fromEntries(stages.map((stage,index)=>[stage,index===0])));
@@ -771,12 +775,26 @@ function ExamScreen({examId,completed,progress,openCategory,setOpenCategory,togg
                     {cat.topicIds.map(id=>{
                       const topic=TOPICS.find(t=>t.id===id)!;
                       const done=completed.has(id);
-                      return <button className={done?"tracker-topic done":"tracker-topic"} key={id} onClick={()=>toggleTopic(id)}>
-                        <span className={done ? "tracker-check circle-choice selected-check" : "tracker-check circle-choice"} aria-hidden="true">
-                          {done ? <CircleCheck size={19} strokeWidth={2.2}/> : <Circle size={19} strokeWidth={1.7}/>}
-                        </span>
-                        <span>{topic.name}</span>
-                      </button>;
+                      const study = topicStudy[id] || { theory: done, practice: false, revisions: 0, lastRevised: null };
+                      return <div className="tracker-topic-wrap" key={id}>
+                        <div className={done?"tracker-topic done":"tracker-topic"}>
+                          <button className="tracker-topic-check" aria-label={`${done ? "Uncomplete" : "Complete"} ${topic.name}`} onClick={()=>toggleTopic(id)}>
+                            <span className={done ? "tracker-check circle-choice selected-check" : "tracker-check circle-choice"} aria-hidden="true">
+                              {done ? <CircleCheck size={19} strokeWidth={2.2}/> : <Circle size={19} strokeWidth={1.7}/>}
+                            </span>
+                          </button>
+                          <span className="tracker-topic-name">{topic.name}</span>
+                          <div className="topic-study-inline" aria-label={`Study status for ${topic.name}`}>
+                            <button type="button" className={`topic-study-chip ${study.theory || done ? "is-active" : ""}`} aria-pressed={study.theory || done} aria-label="Theory completed" title="Theory completed" onClick={()=>updateTopicStudy(id,{theory:!(study.theory || done)})}>T</button>
+                            <button type="button" className={`topic-study-chip ${study.practice ? "is-active" : ""}`} aria-pressed={study.practice} aria-label="Questions practised" title="Questions practised" onClick={()=>updateTopicStudy(id,{practice:!study.practice})}>P</button>
+                            <div className="topic-study-revision-inline" title={study.lastRevised ? `Last revised ${study.lastRevised}` : "Revision count"}>
+                              <button type="button" aria-label="Decrease revision count" disabled={study.revisions <= 0} onClick={()=>updateTopicStudy(id,{revisions:Math.max(0,study.revisions-1),lastRevised:study.revisions <= 1 ? null : study.lastRevised})}>−</button>
+                              <strong>{study.revisions} R</strong>
+                              <button type="button" aria-label="Increase revision count" onClick={()=>{const date=new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});updateTopicStudy(id,{revisions:study.revisions+1,lastRevised:date});}}>+</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>;
                     })}
                   </div>}
                 </div>;

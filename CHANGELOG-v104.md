@@ -1,0 +1,1 @@
+# v104 — Refined inline study controls\n\n- Changed T and P controls to circular toggles to match the syllabus completion check style.\n- Changed the revision counter to a pill-shaped control displaying the count before R (for example, `2 R`).\n- Kept increment/decrement controls inside the revision pill.\n- Preserved all existing status storage and behaviour.\n
