@@ -370,6 +370,7 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
   }
 
   return <section className="page dashboard-page fade-in">
+    <div className="page-sticky-controls dashboard-sticky-controls">
     <div className="dashboard-hero dashboard-hero-compact">
       <div className="dashboard-stats">
         <div className="dashboard-stat"><strong>{selectedExams.length}</strong><span>exams</span></div>
@@ -393,6 +394,7 @@ function HomeScreen({completed, globalProgress, examProgress, onOpen, selectedEx
           </div>
         ))}
       </div>
+    </div>
     </div>
 
     <div className="home-exam-sections">
@@ -893,11 +895,13 @@ function Analytics({store,selectedExams,toggleHomeExam,reorderSelectedExam,selec
     return ids.map(id=>({id,topic:TOPICS.find(topic=>topic.id===id),subject:exam?.categories.find(c=>c.topicIds.includes(id))?.name || TOPICS.find(topic=>topic.id===id)?.category || "Syllabus"})).filter(x=>x.topic);
   }
   return <section className="page fade-in analytics-page">
+    <div className="page-sticky-controls analytics-sticky-controls">
     <div className="dashboard-selector-card analytics-selector-card">
       <button className="dashboard-selector-label selector-title-button" onClick={openSelector} aria-haspopup="dialog"><span className="selector-title">My Exams</span><span className="selector-meta"><span className="selector-count">{visibleExams.length} selected</span><ChevronDown size={13} className="selector-dropdown-icon" aria-hidden="true" /></span></button>
       <div className="selected-exam-chips">{visibleExams.map(exam=><div className="selected-exam-chip" key={exam.id}><span className={`chip-icon exam-chip-${exam.id}`}><ExamIcon examId={exam.id}/></span><span>{exam.name}</span></div>)}</div>
     </div>
     <div className="analytics-year-controls"><div className="heatmap-periods" role="group" aria-label="Heatmap date range">{([{id:"12months",label:"Last 12 months"},{id:"month",label:"Last month"},{id:"week",label:"Last week"}] as const).map(item=><button key={item.id} className={period===item.id?"heatmap-period active":"heatmap-period"} onClick={()=>{setPeriod(item.id);setActivePill(null);setPinnedPill(null);setDetailPosition(null)}}>{item.label}</button>)}</div><span className="heatmap-help">Select a pill to see completed topics</span></div>
+    </div>
     <div className={`analytics-heatmaps-grid period-${period}`}>
     {visibleExams.map(exam=>{
       const examActivity = store.activityByExam?.[exam.id] || store.activity;
