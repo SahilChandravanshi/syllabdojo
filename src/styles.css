@@ -5560,3 +5560,33 @@ h1 {
     padding-bottom: 7px;
   }
 }
+
+
+/* v114 — soften the sticky control surface's lower edge */
+.page-sticky-controls {
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 0 18px 18px;
+  overflow: clip;
+}
+
+
+/* v115 — make the rounded sticky divider span the full card/content width */
+.page-sticky-controls {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  align-self: stretch;
+}
+
+.page-sticky-controls::after {
+  content: "";
+  position: absolute;
+  left: -18px;
+  right: -18px;
+  bottom: 0;
+  height: 1px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 0 18px 18px;
+  pointer-events: none;
+}
