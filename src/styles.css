@@ -5270,3 +5270,27 @@ h1 {
     padding: 0 5px !important;
   }
 }
+
+
+/* v106 — subtle desktop-only scale refinement */
+@media (min-width: 1100px) {
+  .app {
+    font-size: 1.025rem;
+  }
+  .app .page-content,
+  .app main {
+    font-size: 1.015em;
+  }
+  .app button,
+  .app input,
+  .app select,
+  .app textarea {
+    font-size: inherit;
+  }
+  .app .exam-card,
+  .app .stat-card,
+  .app .analytics-card,
+  .app .tracker-card {
+    padding: 1.04em;
+  }
+}
